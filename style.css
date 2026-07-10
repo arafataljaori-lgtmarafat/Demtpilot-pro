@@ -1,0 +1,678 @@
+/* ============================================================
+   DentPilot — نظام إدارة ومتابعة المرضى — التنسيقات
+   هوية طبية فاخرة: Teal · White · Navy
+   ============================================================ */
+
+:root{
+  /* الكحلي (Navy) */
+  --navy-900:#0a1f3c;
+  --navy-800:#0e2a4d;
+  --navy-700:#13315c;
+  /* الفيروزي (Teal) */
+  --teal-700:#0c7a7a;
+  --teal-600:#0e8f8f;
+  --teal-500:#16a8a6;
+  --teal-100:#e1f3f2;
+  --teal-50:#f0f9f8;
+  /* محايد */
+  --white:#ffffff;
+  --bg:#eef4f6;
+  --paper:#fbfdfd;
+  --ink:#0e2233;
+  --muted:#5d7389;
+  --line:#dce7ec;
+
+  /* حالات المواعيد */
+  --late:#c0392b;      --late-soft:#fbeae8;
+  --today:#e08a0b;     --today-soft:#fdf3e0;
+  --tomorrow:#0e8f8f;  --tomorrow-soft:#e1f3f2;
+
+  --red:#c0392b;       --red-soft:#fbeae8;
+  --green:#1e8a5a;
+  --wa:#25d366;        --wa-soft:#e7faf0;
+  --call:#2563eb;      --call-soft:#e8efff;
+
+  --shadow-sm:0 1px 2px rgba(10,31,60,.06), 0 6px 18px rgba(10,31,60,.06);
+  --shadow-md:0 10px 30px rgba(10,31,60,.12);
+  --radius:16px;
+}
+
+*{ box-sizing:border-box; }
+
+/* احترام خاصية hidden دائماً (تتغلب على display في القواعد الأخرى) */
+[hidden]{ display:none !important; }
+
+html{ -webkit-text-size-adjust:100%; }
+body{
+  margin:0;
+  font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;
+  background:
+    radial-gradient(1100px 460px at 100% -8%, #e0eef0 0%, transparent 60%),
+    var(--bg);
+  color:var(--ink);
+  line-height:1.6;
+  min-height:100vh;
+  -webkit-tap-highlight-color:transparent;
+}
+h1,h2{ font-family:'Cairo','Tajawal',sans-serif; margin:0; }
+
+/* ---------- شاشة البداية ---------- */
+.splash{
+  position:fixed; inset:0; z-index:1000;
+  display:grid; place-items:center;
+  background:linear-gradient(150deg, var(--navy-900), var(--teal-700));
+  animation:splashOut .5s ease 1s forwards;
+}
+.splash-logo{ text-align:center; color:#fff; animation:rise .6s ease both; }
+.splash-logo img{ border-radius:22px; box-shadow:0 18px 40px rgba(0,0,0,.35); }
+.splash-logo h1{ font-size:1.5rem; margin:16px 0 4px; letter-spacing:.5px; }
+.splash-logo p{ margin:0; opacity:.8; font-size:.92rem; }
+@keyframes rise{ from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:translateY(0)} }
+@keyframes splashOut{ to{opacity:0; visibility:hidden} }
+
+/* ---------- الشريط العلوي ---------- */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:16px 24px;
+  padding-top:calc(16px + env(safe-area-inset-top));
+  background:linear-gradient(120deg, var(--navy-900) 0%, var(--navy-700) 55%, var(--teal-700) 140%);
+  color:#fff;
+  box-shadow:var(--shadow-md);
+  position:sticky; top:0; z-index:30;
+}
+.brand{ display:flex; align-items:center; gap:14px; min-width:0; }
+.brand-mark{
+  display:grid; place-items:center; flex:none;
+  width:46px; height:46px;
+  background:rgba(255,255,255,.13);
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:13px; color:#bdeee9;
+}
+.brand-text{ min-width:0; }
+.brand-text h1{ font-size:1.18rem; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.brand-text p{ margin:0; font-size:.8rem; opacity:.78; }
+
+.topbar-actions{ display:flex; align-items:center; gap:10px; flex:none; }
+.icon-btn{
+  position:relative; display:grid; place-items:center;
+  width:44px; height:44px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:12px; color:#fff; cursor:pointer;
+  transition:background .15s ease, transform .1s ease;
+}
+.icon-btn:hover{ background:rgba(255,255,255,.22); }
+.icon-btn:active{ transform:scale(.94); }
+.install-btn{ background:rgba(22,168,166,.32); border-color:rgba(22,168,166,.5); }
+.bell-count{
+  position:absolute; top:-6px; inset-inline-start:-6px;
+  min-width:20px; height:20px; padding:0 5px;
+  display:grid; place-items:center;
+  background:var(--late); color:#fff;
+  font-size:.72rem; font-weight:700;
+  border-radius:999px; border:2px solid var(--navy-800);
+}
+
+/* ---------- شريط التنبيه ---------- */
+.alert-banner{
+  margin:16px auto 0; max-width:1180px;
+  background:#fff; border:1px solid var(--line);
+  border-inline-start:5px solid var(--late);
+  border-radius:var(--radius); box-shadow:var(--shadow-sm);
+  padding:14px 18px;
+}
+.alert-head{ display:flex; align-items:center; justify-content:space-between; }
+.alert-head strong{ color:var(--late); font-family:'Cairo',sans-serif; }
+.alert-close{ background:none; border:none; cursor:pointer; font-size:1rem; color:var(--muted); line-height:1; }
+.alert-list{ margin:10px 0 0; padding:0; list-style:none; display:grid; gap:8px; }
+.alert-list li{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:8px 12px; border-radius:10px;
+  background:var(--today-soft); font-size:.92rem;
+}
+.alert-list li.tomorrow{ background:var(--tomorrow-soft); }
+.alert-list .tag{ font-size:.72rem; font-weight:700; padding:2px 9px; border-radius:999px; color:#fff; background:var(--today); }
+.alert-list li.tomorrow .tag{ background:var(--tomorrow); }
+
+/* ---------- التخطيط ---------- */
+.wrap{ max-width:1180px; margin:0 auto; padding:22px 24px 48px; }
+
+/* ---------- البحث ---------- */
+.search-box{
+  display:flex; align-items:center; gap:10px;
+  background:#fff; border:1px solid var(--line);
+  border-radius:13px; padding:11px 14px;
+  flex:1 1 280px; max-width:460px; color:var(--muted);
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.search-box:focus-within{ border-color:var(--teal-500); box-shadow:0 0 0 3px rgba(22,168,166,.15); }
+.search-box input{ border:none; outline:none; background:none; width:100%; font-family:inherit; font-size:.95rem; color:var(--ink); }
+
+/* ---------- الأزرار ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  font-family:inherit; font-size:.95rem; font-weight:700;
+  padding:12px 20px; border-radius:13px;
+  border:1px solid transparent; cursor:pointer;
+  transition:filter .15s ease, transform .1s ease, background .15s ease;
+}
+.btn:active{ transform:translateY(1px); }
+.btn-primary{ background:linear-gradient(120deg, var(--teal-600), var(--teal-700)); color:#fff; box-shadow:0 6px 16px rgba(14,143,143,.28); }
+.btn-primary:hover{ filter:brightness(1.06); }
+.btn-ghost{ background:#fff; color:var(--navy-800); border-color:var(--line); }
+.btn-ghost:hover{ background:var(--teal-100); }
+.btn-danger{ background:var(--red); color:#fff; }
+.btn-danger:hover{ filter:brightness(1.06); }
+
+/* ---------- الحالة الفارغة ---------- */
+.empty-state{ text-align:center; padding:54px 20px; color:var(--muted); }
+.empty-state p{ font-family:'Cairo',sans-serif; font-size:1.05rem; margin:0 0 6px; color:var(--ink); }
+
+/* ---------- النوافذ ---------- */
+.modal-overlay{
+  position:fixed; inset:0; z-index:60;
+  background:rgba(10,31,60,.5); backdrop-filter:blur(3px);
+  display:grid; place-items:center; padding:18px; animation:fade .15s ease;
+}
+@keyframes fade{ from{opacity:0} to{opacity:1} }
+.modal{
+  background:#fff; width:100%; max-width:580px;
+  border-radius:20px; box-shadow:0 24px 70px rgba(10,31,60,.4);
+  overflow:hidden; animation:pop .18s ease;
+  max-height:92vh; overflow-y:auto;
+}
+.modal-sm{ max-width:410px; padding-bottom:18px; }
+@keyframes pop{ from{transform:translateY(12px); opacity:0} to{transform:translateY(0); opacity:1} }
+.modal-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 22px; border-bottom:1px solid var(--line);
+  background:linear-gradient(120deg, var(--navy-900), var(--navy-700)); color:#fff;
+  position:sticky; top:0;
+}
+.modal-head h2{ font-size:1.12rem; }
+.modal-close{ background:rgba(255,255,255,.14); border:none; width:32px; height:32px; border-radius:9px; font-size:1rem; cursor:pointer; color:#fff; }
+.modal-close:hover{ background:rgba(255,255,255,.26); }
+.confirm-text{ padding:18px 22px 6px; color:var(--muted); }
+
+/* ---------- النموذج ---------- */
+.form{ padding:20px 22px; }
+.form-section{
+  font-family:'Cairo',sans-serif; font-weight:700; font-size:.82rem;
+  color:var(--teal-700); margin:6px 0 12px; padding-bottom:6px;
+  border-bottom:1px dashed var(--line);
+}
+.form-section:not(:first-child){ margin-top:20px; }
+.field{ margin-bottom:14px; display:flex; flex-direction:column; gap:6px; }
+.field label{ font-size:.85rem; font-weight:700; color:var(--navy-800); }
+.field input{
+  font-family:inherit; font-size:.95rem; color:var(--ink);
+  padding:12px 13px; border:1px solid var(--line); border-radius:12px;
+  background:var(--paper); outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.field input:focus{ border-color:var(--teal-500); box-shadow:0 0 0 3px rgba(22,168,166,.16); background:#fff; }
+.field input[readonly]{ background:var(--teal-100); font-weight:700; color:var(--teal-700); }
+.field input.invalid{ border-color:var(--red); box-shadow:0 0 0 3px rgba(192,57,43,.12); }
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.form-actions{ display:flex; justify-content:flex-start; gap:10px; margin-top:10px; }
+
+/* ---------- التذييل ---------- */
+.footer{ text-align:center; padding:24px 18px calc(24px + env(safe-area-inset-bottom)); color:var(--muted); font-size:.84rem; }
+
+/* ---------- الاستجابة ---------- */
+@media (max-width:560px){
+  .topbar{ padding:13px 15px; padding-top:calc(13px + env(safe-area-inset-top)); }
+  .brand-text h1{ font-size:.98rem; white-space:normal; }
+  .brand-text p{ font-size:.72rem; }
+  .brand-mark{ width:40px; height:40px; }
+  .wrap{ padding:18px 14px 36px; }
+  .grid-2,.grid-3{ grid-template-columns:1fr; }
+  .search-box{ max-width:none; }
+  .btn-primary{ width:100%; }
+  .modal{ max-width:none; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{ animation:none !important; transition:none !important; }
+  .splash{ animation:splashOut .1s ease .6s forwards; }
+}
+
+/* ============================================================
+   DentPilot v2 — واجهات لوحة التحكم والبطاقات
+   (إضافات فوق التصميم الحالي — نفس لوحة الألوان)
+   ============================================================ */
+
+.view{ animation:viewIn .2s ease; }
+@keyframes viewIn{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+.back-btn{ margin-inline-end:2px; }
+
+/* ---------- لوحة التحكم (بطاقات مدمجة) ---------- */
+.dash-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px; }
+.dash-card{
+  display:flex; align-items:center; gap:11px; text-align:start; cursor:pointer;
+  background:#fff; border:1px solid var(--line); border-radius:13px;
+  padding:11px 12px; box-shadow:var(--shadow-sm); font-family:inherit;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.dash-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); }
+.dash-card:active{ transform:translateY(-1px); }
+.dash-emoji{ font-size:1.25rem; width:40px; height:40px; display:grid; place-items:center; background:var(--teal-100); border-radius:11px; flex:none; }
+.dash-card.warn .dash-emoji{ background:var(--late-soft); }
+.dash-card.accent{ background:linear-gradient(120deg,var(--teal-600),var(--teal-700)); border-color:transparent; box-shadow:0 6px 16px rgba(14,143,143,.26); }
+.dash-card.accent .dash-emoji{ background:rgba(255,255,255,.2); }
+.dash-card.accent .dash-title,.dash-card.accent .dash-sub{ color:#fff; }
+.dash-info{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+.dash-title{ font-family:'Cairo',sans-serif; font-weight:700; font-size:.92rem; color:var(--navy-800); line-height:1.25; }
+.dash-count{ font-family:'Cairo',sans-serif; font-weight:800; font-size:1.25rem; color:var(--teal-700); line-height:1.05; }
+.dash-card.warn .dash-count{ color:var(--late); }
+.dash-sub{ font-size:.76rem; color:var(--muted); }
+
+.section-head{ margin:6px 0 14px; }
+.section-head h2,.page-head h2{ font-family:'Cairo',sans-serif; font-size:1.15rem; color:var(--navy-800); margin:0; }
+
+/* ---------- رؤوس الصفحات + أدوات ---------- */
+.page-head{ display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
+.page-tools{ display:flex; align-items:center; gap:10px; }
+.search-box.sm{ flex:0 1 210px; padding:9px 12px; border-radius:11px; }
+.search-box.sm input{ font-size:.9rem; }
+
+/* ---------- قائمة مواعيد اليوم ---------- */
+.appt-list{ display:grid; gap:10px; }
+.appt-item{
+  display:flex; align-items:center; gap:12px;
+  background:#fff; border:1px solid var(--line); border-inline-start:4px solid var(--today);
+  border-radius:14px; padding:11px 14px; box-shadow:var(--shadow-sm);
+}
+.appt-when{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-width:66px; padding:7px 8px; background:var(--today-soft); color:var(--today);
+  border-radius:11px; font-weight:800; font-variant-numeric:tabular-nums;
+}
+.appt-when .lbl{ font-size:.66rem; font-weight:700; }
+.appt-main{ flex:1; min-width:0; }
+.appt-main .nm{ font-weight:700; color:var(--navy-800); }
+.appt-main .tr{ font-size:.84rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.appt-btns{ display:flex; gap:6px; flex:none; }
+
+/* ---------- أزرار البطاقات ---------- */
+.card-btn{
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:inherit; font-size:.8rem; font-weight:700;
+  padding:7px 11px; border-radius:10px; border:1px solid var(--line);
+  background:#fff; cursor:pointer; color:var(--navy-700); text-decoration:none;
+  transition:background .15s ease, color .15s ease, border-color .15s ease, transform .1s ease;
+}
+.card-btn:active{ transform:scale(.95); }
+.card-btn.icon-only{ padding:7px 9px; }
+.card-btn.edit:hover{ background:#eef2fb; color:var(--navy-700); border-color:#cfd9ef; }
+.card-btn.call:hover{ background:var(--call-soft); color:var(--call); border-color:#c7d6fb; }
+.card-btn.wa:hover{ background:var(--wa-soft); color:var(--wa); border-color:#bde9cf; }
+.card-btn.complete:hover{ background:#e7f7ef; color:var(--green); border-color:#bfe6d2; }
+.card-btn.del:hover{ background:var(--red-soft); color:var(--red); border-color:#f0c4c2; }
+.card-btn.disabled{ opacity:.4; pointer-events:none; }
+
+/* ---------- بطاقات المرضى ---------- */
+.cards-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:16px; }
+.pcard{
+  background:#fff; border:1px solid var(--line); border-radius:18px;
+  box-shadow:var(--shadow-sm); overflow:hidden; display:flex; flex-direction:column;
+  transition:transform .15s ease, box-shadow .15s ease;
+}
+.pcard:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); }
+.pcard.is-late{ box-shadow:inset 4px 0 0 var(--late), var(--shadow-sm); }
+.pcard.is-today{ box-shadow:inset 4px 0 0 var(--today), var(--shadow-sm); }
+.pcard.is-tomorrow{ box-shadow:inset 4px 0 0 var(--tomorrow), var(--shadow-sm); }
+.pcard-top{ padding:16px 16px 12px; display:flex; gap:12px; align-items:flex-start; }
+.pcard-avatar{ width:46px; height:46px; border-radius:13px; display:grid; place-items:center; background:var(--teal-100); color:var(--teal-700); font-family:'Cairo',sans-serif; font-weight:800; font-size:1.1rem; flex:none; }
+.pcard-id{ min-width:0; flex:1; }
+.pcard-name{ font-family:'Cairo',sans-serif; font-weight:700; color:var(--navy-800); font-size:1.05rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pcard-treat{ font-size:.85rem; color:var(--muted); }
+.pcard-status{ font-size:.68rem; font-weight:700; padding:3px 9px; border-radius:999px; color:#fff; white-space:nowrap; flex:none; align-self:flex-start; }
+.st-late{ background:var(--late); } .st-today{ background:var(--today); } .st-tomorrow{ background:var(--tomorrow); }
+.st-upcoming{ background:var(--teal-600); } .st-none{ background:#9aa9b6; }
+.pcard-actions{ display:flex; flex-wrap:wrap; gap:6px; padding:12px 14px; border-top:1px solid var(--line); background:#fbfdfd; }
+
+/* ---------- الإحصائيات ---------- */
+.stats-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; }
+.sbox{ background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px; box-shadow:var(--shadow-sm); border-top:3px solid var(--teal-600); }
+.sbox .sl{ font-size:.85rem; color:var(--muted); }
+.sbox .sv{ font-family:'Cairo',sans-serif; font-weight:800; font-size:1.65rem; color:var(--navy-800); margin-top:4px; font-variant-numeric:tabular-nums; }
+.sbox.late{ border-top-color:var(--late); } .sbox.late .sv{ color:var(--late); }
+.sbox.today{ border-top-color:var(--today); } .sbox.today .sv{ color:var(--today); }
+.sbox.money{ border-top-color:var(--red); } .sbox.money .sv{ color:var(--red); }
+
+/* ---------- النسخة الاحتياطية ---------- */
+.backup-card{ background:#fff; border:1px solid var(--line); border-radius:18px; padding:30px 24px; box-shadow:var(--shadow-sm); text-align:center; }
+.backup-card p{ color:var(--muted); margin:0 auto; max-width:540px; }
+.backup-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px; }
+
+/* ---------- التوست ---------- */
+.toast{ position:fixed; inset-inline:0; bottom:calc(24px + env(safe-area-inset-bottom)); margin:auto; width:max-content; max-width:90%; background:var(--navy-800); color:#fff; padding:12px 22px; border-radius:12px; box-shadow:var(--shadow-md); z-index:200; font-weight:700; font-size:.9rem; animation:toastIn .2s ease; }
+@keyframes toastIn{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }
+
+.form-hint{ color:var(--muted); font-size:.9rem; margin:0 0 14px; }
+
+/* ---------- استجابة v2 ---------- */
+@media (max-width:900px){ .dash-grid{ grid-template-columns:repeat(3,1fr); } }
+@media (max-width:640px){
+  .dash-grid{ grid-template-columns:1fr 1fr; gap:9px; margin-bottom:14px; }
+  .dash-card{ padding:10px 11px; gap:9px; border-radius:12px; }
+  .dash-emoji{ width:36px; height:36px; font-size:1.15rem; border-radius:10px; }
+  .dash-title{ font-size:.85rem; }
+  .dash-count{ font-size:1.15rem; }
+  .dash-sub{ font-size:.72rem; }
+  .page-head{ gap:10px; }
+  .page-tools{ width:100%; }
+  .search-box.sm{ flex:1 1 auto; }
+  .cards-grid{ grid-template-columns:1fr; }
+  .appt-main .tr{ white-space:normal; }
+}
+/* الشاشات الضيقة جداً: نُبقي عمودين مدمجين بدل عمود واحد لتقليل الحاجة للتمرير */
+@media (max-width:380px){
+  .dash-grid{ grid-template-columns:1fr 1fr; gap:8px; }
+  .dash-card{ padding:9px 10px; gap:8px; }
+  .dash-emoji{ width:34px; height:34px; font-size:1.05rem; }
+}
+
+/* ============================================================
+   DentPilot v2 — Sprint 2A: بطاقة مدمجة + ملف المريض
+   ============================================================ */
+
+/* ---------- بطاقة مريض مدمجة ---------- */
+.pcard.compact .pcard-top{ padding:14px 14px 8px; }
+.pcard-sub{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:0 14px 12px; font-size:.85rem; color:var(--navy-700); flex-wrap:wrap;
+}
+.ps-appt{ display:inline-flex; align-items:center; gap:6px; min-width:0; }
+.ps-appt svg{ color:var(--teal-600); flex:none; }
+.ps-appt > span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pcard.compact .pcard-actions{ background:#fbfdfd; }
+
+/* ---------- ملف المريض: الترويسة ---------- */
+.file-hero{
+  display:flex; align-items:center; gap:14px;
+  background:linear-gradient(120deg, var(--navy-900), var(--navy-700) 70%, var(--teal-700));
+  color:#fff; border-radius:18px; padding:20px; box-shadow:var(--shadow-md); margin-bottom:14px;
+}
+.file-avatar{
+  width:62px; height:62px; border-radius:16px; flex:none;
+  display:grid; place-items:center; background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.25); font-family:'Cairo',sans-serif; font-weight:800; font-size:1.5rem;
+}
+.file-hero-main{ flex:1; min-width:0; }
+.file-hero-main h2{ font-size:1.3rem; }
+.file-hero-sub{ opacity:.82; font-size:.9rem; }
+.file-status{ font-size:.72rem; font-weight:700; padding:4px 11px; border-radius:999px; color:#fff; flex:none; }
+
+/* ---------- ملف المريض: أزرار الإدارة ---------- */
+.file-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+.file-actions .card-btn{ padding:9px 14px; font-size:.86rem; }
+
+/* ---------- ملف المريض: كتلة المعلومات ---------- */
+.file-block{ background:#fff; border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow-sm); padding:18px; margin-bottom:14px; }
+.fs-head{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.fs-head h3{ font-family:'Cairo',sans-serif; font-size:1.02rem; color:var(--navy-800); margin:0; flex:1; }
+.fs-ico{ font-size:1.15rem; width:34px; height:34px; display:grid; place-items:center; background:var(--teal-100); border-radius:10px; flex:none; }
+.fs-badge{ font-size:.68rem; font-weight:800; color:var(--teal-700); background:var(--teal-100); padding:3px 9px; border-radius:999px; }
+.fs-head.plain{ border-bottom:1px dashed var(--line); padding-bottom:12px; }
+
+.info-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:12px; }
+.info-card{ display:flex; align-items:center; gap:11px; background:var(--paper); border:1px solid var(--line); border-radius:13px; padding:12px 13px; }
+.info-ico{ font-size:1.1rem; width:38px; height:38px; display:grid; place-items:center; background:#fff; border:1px solid var(--line); border-radius:11px; flex:none; }
+.info-meta{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.info-label{ font-size:.74rem; color:var(--muted); }
+.info-value{ font-family:'Cairo',sans-serif; font-weight:700; color:var(--navy-800); font-size:.95rem; word-break:break-word; }
+.info-value.pos{ color:var(--red); } .info-value.zero{ color:var(--green); }
+
+.notes-card{ margin-top:14px; background:var(--paper); border:1px solid var(--line); border-radius:13px; padding:14px; }
+.notes-card .info-label{ display:block; margin-bottom:6px; font-weight:700; color:var(--navy-800); }
+.notes-text{ margin:0; color:var(--muted); font-size:.9rem; }
+
+/* ---------- ملف المريض: الأقسام ---------- */
+.file-section{ background:#fff; border:1px solid var(--line); border-radius:18px; box-shadow:var(--shadow-sm); padding:18px; margin-bottom:14px; }
+
+@media (max-width:560px){
+  .file-hero{ padding:16px; gap:12px; }
+  .file-avatar{ width:54px; height:54px; font-size:1.3rem; }
+  .file-hero-main h2{ font-size:1.12rem; }
+  .info-grid{ grid-template-columns:1fr 1fr; }
+  .file-actions .card-btn{ flex:1 1 auto; justify-content:center; }
+}
+@media (max-width:380px){ .info-grid{ grid-template-columns:1fr; } }
+
+/* ============================================================
+   DentPilot — Sprint 2B: جلسات • خط زمني • دفعات • مكتملون • طباعة
+   ============================================================ */
+
+/* ملخص مالي داخل بطاقة المريض */
+.pcard-money{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.pcard-money > span{ background:#fff; padding:8px 6px; text-align:center; display:flex; flex-direction:column; gap:2px; }
+.pcard-money i{ font-style:normal; font-size:.68rem; color:var(--muted); }
+.pcard-money b{ font-family:'Cairo',sans-serif; font-weight:700; font-size:.92rem; font-variant-numeric:tabular-nums; color:var(--navy-800); }
+.pcard-money b.pos{ color:var(--red); } .pcard-money b.zero{ color:var(--green); }
+
+/* حالة/شارة المكتمل */
+.st-done{ background:var(--green) !important; color:#fff; }
+.pcard.is-done{ box-shadow:inset 4px 0 0 var(--green), var(--shadow-sm); }
+.pcard-avatar.done{ background:#e7f7ef; color:var(--green); }
+.file-hero.done{ background:linear-gradient(120deg,#0c5c43,#0e8f8f); }
+.done-banner{ background:#e7f7ef; border:1px solid #bfe6d2; color:#136b4a; border-radius:12px; padding:11px 14px; font-size:.9rem; font-weight:700; margin-bottom:14px; }
+
+/* أزرار بطاقات إضافية */
+.card-btn.print:hover{ background:#eef2fb; color:var(--navy-700); border-color:#cfd9ef; }
+.card-btn.restore:hover{ background:var(--teal-100); color:var(--teal-700); border-color:#bfe6e3; }
+
+/* أزرار مصغّرة (أدوات الجلسة) */
+.mini-btn{ width:32px; height:32px; border-radius:9px; border:1px solid var(--line); background:#fff; cursor:pointer; font-size:.85rem; display:inline-grid; place-items:center; transition:background .15s ease, border-color .15s ease, transform .1s ease; }
+.mini-btn:active{ transform:scale(.92); }
+.mini-btn:hover{ background:var(--teal-100); border-color:#bfe6e3; }
+.mini-btn.on{ background:#e7f7ef; border-color:#bfe6d2; }
+.mini-btn.del:hover{ background:var(--red-soft); border-color:#f0c4c2; }
+.mini-btn + .mini-btn{ margin-inline-start:4px; }
+
+.sub-empty{ text-align:center; color:var(--muted); padding:20px; background:var(--paper); border:1px dashed var(--line); border-radius:12px; font-size:.9rem; }
+
+/* خانة اختيار في النموذج */
+.check-field{ display:flex; align-items:center; gap:9px; cursor:pointer; font-size:.92rem; font-weight:700; color:var(--navy-800); margin-bottom:14px; padding:11px 13px; background:var(--paper); border:1px solid var(--line); border-radius:12px; }
+.check-field input{ width:20px; height:20px; accent-color:var(--teal-600); }
+
+/* بطاقات الجلسات */
+.sess-card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:13px 14px; margin-bottom:10px; box-shadow:var(--shadow-sm); border-inline-start:4px solid var(--teal-500); }
+.sess-card.done{ border-inline-start-color:var(--green); background:#fbfefc; }
+.sess-head{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.sess-no{ font-family:'Cairo',sans-serif; font-weight:800; color:var(--navy-800); background:var(--teal-100); padding:3px 11px; border-radius:999px; font-size:.82rem; }
+.sess-when{ font-size:.82rem; color:var(--muted); flex:1; min-width:120px; }
+.sess-tools{ flex:none; }
+.sess-treat{ margin-top:8px; font-weight:700; color:var(--navy-800); font-size:.92rem; }
+.sess-note{ margin-top:5px; color:var(--muted); font-size:.86rem; }
+.sess-foot{ margin-top:9px; display:flex; gap:14px; flex-wrap:wrap; font-size:.85rem; color:var(--navy-700); }
+.sess-paid b{ font-variant-numeric:tabular-nums; color:var(--green); }
+.sess-next{ color:var(--teal-700); }
+
+/* الخط الزمني الرأسي */
+.timeline{ position:relative; padding-inline-start:8px; }
+.tl-node{ position:relative; padding-inline-start:34px; padding-bottom:16px; }
+.tl-node:not(:last-child)::before{ content:""; position:absolute; inset-inline-start:13px; top:26px; bottom:0; width:2px; background:var(--line); }
+.tl-marker{ position:absolute; inset-inline-start:0; top:2px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; background:var(--teal-600); color:#fff; font-family:'Cairo',sans-serif; font-weight:800; font-size:.8rem; box-shadow:0 0 0 4px var(--teal-100); z-index:1; }
+.tl-node.done .tl-marker{ background:var(--green); box-shadow:0 0 0 4px #e7f7ef; }
+.tl-card{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:11px 13px; box-shadow:var(--shadow-sm); }
+.tl-title{ font-family:'Cairo',sans-serif; font-weight:700; color:var(--navy-800); font-size:.92rem; }
+.tl-meta{ font-size:.8rem; color:var(--muted); margin-top:2px; }
+.tl-pay{ font-size:.82rem; color:var(--green); margin-top:4px; font-variant-numeric:tabular-nums; }
+.tl-sub{ font-size:.82rem; color:var(--muted); margin-top:4px; }
+
+/* سجل الدفعات */
+.pay-row{ display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:11px 13px; margin-bottom:8px; box-shadow:var(--shadow-sm); }
+.pay-amount{ font-family:'Cairo',sans-serif; font-weight:800; color:var(--green); font-size:1.05rem; font-variant-numeric:tabular-nums; min-width:70px; }
+.pay-meta{ display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
+.pay-date{ font-size:.85rem; color:var(--navy-700); }
+.pay-num{ font-size:.76rem; color:var(--muted); }
+.pay-note{ font-size:.8rem; color:var(--muted); }
+
+/* التقارير */
+.report-list{ display:grid; gap:8px; }
+.report-row{ display:flex; justify-content:space-between; padding:10px 13px; background:var(--paper); border:1px solid var(--line); border-radius:10px; font-size:.9rem; }
+.report-row b{ font-variant-numeric:tabular-nums; }
+.report-row b.pos{ color:var(--red); }
+
+/* زر المكتملين في رأس الصفحة */
+#completedBtn{ white-space:nowrap; }
+#completedBtn span{ background:var(--teal-100); color:var(--teal-700); padding:1px 8px; border-radius:999px; font-size:.8rem; margin-inline-start:4px; }
+
+/* ---------- لمسات RC: إمكانية وصول + سلاسة ---------- */
+:focus-visible{ outline:2px solid var(--teal-500); outline-offset:2px; }
+button:focus:not(:focus-visible){ outline:none; }
+.field input:focus-visible{ outline:none; }
+a, button{ -webkit-tap-highlight-color:transparent; }
+img{ max-width:100%; }
+
+/* ---------- شاشة التفعيل ---------- */
+.act-overlay{ z-index:2000; }
+.act-label{ font-size:.85rem; font-weight:700; color:var(--navy-800); display:block; margin-bottom:6px; }
+.act-idrow{ display:flex; align-items:center; gap:8px; }
+.act-id{ flex:1; font-family:'Courier New',monospace; font-weight:800; font-size:1.15rem; letter-spacing:2px; color:var(--navy-900); background:var(--teal-100); border:1px dashed var(--teal-600); border-radius:12px; padding:12px 14px; text-align:center; user-select:all; }
+.act-copy{ flex:none; padding:10px 14px; }
+.act-error{ color:var(--red); font-size:.85rem; font-weight:700; margin:10px 0 0; }
+#actCode{ text-align:center; letter-spacing:2px; font-family:'Courier New',monospace; text-transform:uppercase; }
+
+/* ============ الطباعة A4 ============ */
+#printArea{ display:none; }
+@media print {
+  body * { visibility:hidden; }
+  #printArea, #printArea * { visibility:visible; }
+  #printArea{ display:block; position:absolute; inset-inline:0; top:0; }
+  @page { size:A4; margin:14mm; }
+  .print-doc{ font-family:'Tajawal','Segoe UI',Tahoma,sans-serif; color:#10233a; direction:rtl; }
+  .p-head{ display:flex; align-items:center; gap:14px; border-bottom:3px solid #0e8f8f; padding-bottom:12px; margin-bottom:16px; }
+  .p-logo{ width:64px; height:64px; border-radius:12px; }
+  .p-brand{ flex:1; }
+  .p-brand h1{ margin:0; font-size:22px; color:#0a1f3c; }
+  .p-brand div{ font-size:12px; color:#33485f; }
+  .p-meta{ font-size:11px; color:#33485f; text-align:left; }
+  .p-section{ font-size:14px; color:#0e8f8f; border-bottom:1px solid #d9e7e3; padding-bottom:5px; margin:18px 0 10px; }
+  .p-info{ width:100%; border-collapse:collapse; font-size:12px; }
+  .p-info td{ border:1px solid #d9e7e3; padding:7px 9px; }
+  .p-info td:nth-child(odd){ background:#f1f7f6; font-weight:700; width:18%; }
+  .p-table{ width:100%; border-collapse:collapse; font-size:11.5px; }
+  .p-table th{ background:#0e2a4d; color:#fff; padding:7px; border:1px solid #0e2a4d; }
+  .p-table td{ border:1px solid #d9e7e3; padding:6px 7px; text-align:center; }
+  .p-tl{ font-size:12px; }
+  .p-tl-item{ padding:5px 0; border-bottom:1px dotted #d9e7e3; }
+  .p-foot{ margin-top:20px; padding-top:10px; border-top:2px solid #0e8f8f; display:flex; justify-content:space-between; font-size:12px; }
+  .p-foot b{ color:#c0392b; font-size:14px; }
+  .topbar, .footer, .splash, .toast, .alert-banner { display:none !important; }
+}
+
+/* ============================================================
+   Release Candidate — الملاحظات والمرفقات وتحسينات
+   ============================================================ */
+
+/* حقل الملاحظات (textarea) */
+.field textarea{
+  font-family:inherit; font-size:.95rem; color:var(--ink);
+  padding:12px 13px; border:1px solid var(--line); border-radius:12px;
+  background:var(--paper); outline:none; resize:vertical; min-height:70px; line-height:1.6;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.field textarea:focus{ border-color:var(--teal-500); box-shadow:0 0 0 3px rgba(22,168,166,.16); background:#fff; }
+
+/* بطاقة الملاحظات في الملف */
+.notes-card{ margin-top:14px; background:var(--paper); border:1px solid var(--line); border-radius:13px; padding:14px; }
+.notes-card .info-label{ display:block; margin-bottom:6px; font-weight:700; color:var(--navy-800); font-size:.82rem; }
+.notes-text{ margin:0; color:var(--navy-700); font-size:.9rem; white-space:pre-wrap; word-break:break-word; }
+
+/* شبكة المرفقات */
+.att-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:12px; }
+.att-card{ position:relative; background:#fff; border:1px solid var(--line); border-radius:13px; overflow:hidden; box-shadow:var(--shadow-sm); }
+.att-thumb{ display:block; width:100%; height:96px; background:var(--teal-50); overflow:hidden; border:0; padding:0; margin:0; cursor:pointer; font:inherit; color:inherit; }
+.att-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+.att-thumb.file{ display:grid; place-items:center; font-size:2rem; text-decoration:none; }
+.att-thumb:focus-visible{ outline:2px solid var(--teal-600); outline-offset:-2px; }
+.att-name{ font-size:.72rem; color:var(--navy-700); padding:7px 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.att-card .att-del{ position:absolute; top:6px; inset-inline-end:6px; background:rgba(255,255,255,.92); }
+
+/* اتساق البطاقات على الجوال */
+@media (max-width:560px){
+  .file-actions .card-btn{ flex:1 1 auto; justify-content:center; }
+  .att-grid{ grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); }
+}
+
+/* ملاحظات في الطباعة */
+@media print {
+  .p-notes{ font-size:12px; border:1px solid #d9e7e3; padding:9px 11px; border-radius:6px; white-space:pre-wrap; }
+}
+
+/* ---------- تجربة Pro المجانية + إضافات الإعدادات ---------- */
+.trial-banner{ display:flex; align-items:center; gap:8px; justify-content:center; background:linear-gradient(120deg,#fff6e5,#fdeccb); color:#8a5a12; border-bottom:1px solid #f0d9a8; padding:9px 16px; font-size:.85rem; font-weight:700; text-align:center; }
+.trial-banner .tb-ico{ font-size:1rem; }
+.settings-extra{ border-top:1px dashed var(--line); margin-top:6px; padding-top:12px; }
+
+/* ============================================================
+   الدعم والتفعيل (نسخة العيادات Pro)
+   ============================================================ */
+.sup-card{ background:#fff; border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow-sm); padding:16px; margin-bottom:14px; }
+.sup-card-head{ display:flex; align-items:center; gap:9px; margin-bottom:12px; }
+.sup-card-head span{ font-size:1.1rem; width:32px; height:32px; display:grid; place-items:center; background:var(--teal-100); border-radius:10px; flex:none; }
+.sup-card-head h3{ font-family:'Cairo',sans-serif; font-size:1rem; color:var(--navy-800); margin:0; }
+
+/* بطاقة التفعيل الناجحة (خضراء) */
+.sup-active{ display:flex; align-items:center; gap:14px; background:linear-gradient(120deg,#e7f7ef,#d7f0e2); border:1px solid #bfe6d2; border-radius:16px; padding:18px; margin-bottom:14px; box-shadow:var(--shadow-sm); }
+.sup-active-ico{ font-size:1.5rem; width:52px; height:52px; display:grid; place-items:center; background:#ffffff; border-radius:14px; flex:none; box-shadow:0 4px 12px rgba(30,138,90,.18); }
+.sup-active-main h3{ font-family:'Cairo',sans-serif; color:#166b45; font-size:1.12rem; margin:0 0 3px; }
+.sup-active-main p{ margin:0; color:#1f7d4f; font-weight:600; font-size:.9rem; }
+.sup-details{ background:#fff; border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow-sm); padding:14px 16px; margin-bottom:14px; }
+
+/* السعر */
+.sup-price{ display:flex; flex-direction:column; gap:3px; background:var(--teal-50); border:1px solid #cfeae7; border-radius:12px; padding:12px 14px; margin-bottom:12px; }
+.sup-price-label{ font-size:.82rem; color:var(--muted); }
+.sup-price-val{ font-family:'Cairo',sans-serif; font-weight:800; font-size:1.5rem; color:var(--teal-700); line-height:1.1; }
+
+/* خطط التفعيل — بطاقات صغيرة */
+.sup-plans{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.sup-plan{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; text-align:center; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 8px; min-height:64px; }
+.sup-plan-title{ font-family:'Cairo',sans-serif; font-weight:700; font-size:.95rem; color:var(--navy-800); }
+.sup-plan-note{ font-size:.72rem; color:var(--muted); }
+
+/* تعليمات الدفع */
+.sup-steps{ margin:0; padding-inline-start:20px; display:flex; flex-direction:column; gap:6px; color:var(--navy-700); font-size:.9rem; }
+.sup-steps li{ line-height:1.55; }
+
+/* طرق الدفع */
+.sup-pays{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.sup-pay{ background:var(--paper); border:1px solid var(--line); border-radius:13px; padding:13px; }
+.sup-pay-head{ font-family:'Cairo',sans-serif; font-weight:800; color:var(--navy-800); font-size:.95rem; margin-bottom:9px; }
+.sup-pay-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:5px 0; border-bottom:1px dashed var(--line); font-size:.86rem; }
+.sup-pay-row:last-of-type{ border-bottom:0; }
+.sup-pay-row span{ color:var(--muted); }
+.sup-pay-row b{ color:var(--navy-800); }
+.sup-num{ font-family:'Cairo',sans-serif; letter-spacing:.5px; }
+.sup-pay-note{ font-size:.76rem; color:var(--muted); margin:6px 0 8px; }
+.sup-copy{ width:100%; margin-top:8px; }
+
+/* رمز التطبيق */
+.sup-code{ font-family:'Cairo',monospace; font-weight:800; font-size:1.05rem; color:var(--teal-700); background:var(--teal-50); border:1px dashed #bfe6e3; border-radius:11px; padding:11px 12px; text-align:center; letter-spacing:1px; margin-bottom:10px; word-break:break-all; }
+
+/* واتساب الدعم */
+.sup-wa{ display:flex; flex-wrap:wrap; gap:10px; }
+.sup-wa .card-btn{ flex:1 1 auto; justify-content:center; padding:11px 14px; }
+
+/* الفترة التجريبية + زر التفعيل */
+.sup-trial{ background:linear-gradient(120deg,#fff6e5,#fdeccb); color:#8a5a12; border:1px solid #f0d9a8; border-radius:12px; padding:11px 14px; font-weight:700; font-size:.88rem; margin-bottom:14px; text-align:center; }
+.sup-trial.expired{ background:var(--late-soft); color:var(--late); border-color:#f0c4c2; }
+.sup-cta{ padding:14px 16px; }
+
+@media (max-width:560px){
+  .sup-plans{ gap:8px; }
+  .sup-pays{ grid-template-columns:1fr; }
+}
+
+/* معاينة المرفقات (Lightbox) */
+.att-lightbox{ position:fixed; inset:0; z-index:1200; background:rgba(6,18,32,.92); display:flex; flex-direction:column; }
+.att-lb-bar{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; color:#fff; }
+.att-lb-name{ font-size:.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.att-lb-close{ background:rgba(255,255,255,.14); color:#fff; border:0; width:38px; height:38px; border-radius:50%; font-size:1.1rem; cursor:pointer; flex:none; }
+.att-lb-close:hover{ background:rgba(255,255,255,.26); }
+.att-lb-stage{ flex:1; display:grid; place-items:center; padding:0 14px 18px; overflow:auto; }
+.att-lb-stage img{ max-width:100%; max-height:100%; object-fit:contain; border-radius:10px; box-shadow:0 12px 40px rgba(0,0,0,.5); }

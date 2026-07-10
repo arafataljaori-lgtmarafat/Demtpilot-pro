@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5" />
+  <title>DentPilot — إدارة مرضى</title>
+  <meta name="description" content="DentPilot — نظام إدارة ومتابعة مرضى الأسنان" />
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0A1F3C" />
+  <meta name="application-name" content="DentPilot" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="DentPilot" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Cairo:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- شاشة البداية -->
+  <div id="splash" class="splash" aria-hidden="true">
+    <div class="splash-logo">
+      <img src="icon-192.png" alt="DentPilot" width="96" height="96" />
+      <h1>DentPilot</h1>
+      <p>نظام إدارة ومتابعة المرضى</p>
+    </div>
+  </div>
+
+  <!-- شاشة التفعيل (بوابة إلزامية لمرة واحدة على الجهاز) -->
+  <div id="activationOverlay" class="modal-overlay act-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="actTitle">
+      <div class="modal-head"><h2 id="actTitle">🔒 تفعيل DentPilot</h2></div>
+      <div class="form">
+        <p class="form-hint" id="actHint">يحتاج التطبيق إلى تفعيل لمرة واحدة على هذا الجهاز. انسخ «معرّف الجهاز» أدناه وأرسله للمطوّر لاستلام كود التفعيل.</p>
+        <label class="act-label">معرّف الجهاز</label>
+        <div class="act-idrow">
+          <span id="actDeviceId" class="act-id">—</span>
+          <button type="button" id="actCopyBtn" class="btn btn-ghost act-copy">نسخ</button>
+        </div>
+        <div class="field" style="margin-top:16px">
+          <label for="actCode">كود التفعيل</label>
+          <input type="text" id="actCode" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" inputmode="latin" />
+        </div>
+        <p id="actError" class="act-error" hidden>⚠️ كود التفعيل غير صحيح لهذا الجهاز.</p>
+        <div class="form-actions">
+          <button type="button" id="actActivateBtn" class="btn btn-primary" style="width:100%">تفعيل التطبيق</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- شاشة الإعداد / الإعدادات -->
+  <div id="doctorOverlay" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="doctorTitle">
+      <div class="modal-head">
+        <h2 id="doctorTitle">إعداد التطبيق</h2>
+        <button id="doctorClose" class="modal-close" aria-label="إغلاق" hidden>✕</button>
+      </div>
+      <form id="doctorForm" class="form" novalidate>
+        <p class="form-hint" id="doctorHint">مرحباً بك في DentPilot. أدخل بيانات الطبيب لبدء استخدام التطبيق.</p>
+        <div class="field"><label for="docName">اسم الطبيب</label><input type="text" id="docName" required placeholder="مثال: د. اسم الطبيب" /></div>
+        <div class="field"><label for="docSpecialty">التخصص</label><input type="text" id="docSpecialty" placeholder="مثال: طب وجراحة الأسنان" /></div>
+        <div class="field"><label for="docClinic">اسم العيادة (اختياري)</label><input type="text" id="docClinic" placeholder="اسم العيادة" /></div>
+        <div id="settingsExtra" class="settings-extra" hidden>
+          <p class="hint">الحالة: <b id="accessStatus">—</b></p>
+          <p class="hint">الإصدار الحالي: <b id="appVersion">—</b></p>
+          <button type="button" id="checkUpdateBtn" class="btn btn-ghost" style="width:100%;margin-top:6px">🔄 التحقق من التحديثات</button>
+          <p id="updateStatus" class="hint" style="margin-top:6px"></p>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="doctorCancel" class="btn btn-ghost" hidden>إلغاء</button>
+          <button type="submit" class="btn btn-primary">حفظ والمتابعة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- الشريط العلوي -->
+  <header class="topbar">
+    <div class="brand">
+      <button id="backBtn" class="icon-btn back-btn" title="رجوع" aria-label="رجوع" hidden>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7.5 3.2C5.4 3.2 4 4.9 4 7.2c0 1.6.4 2.6.8 4.2.5 1.9.5 3 .8 4.7.3 1.7.6 4 1.6 4 1 0 1.2-1.6 1.5-3.1.3-1.5.5-2.7 1.7-2.7s1.4 1.2 1.7 2.7c.3 1.5.5 3.1 1.5 3.1 1 0 1.3-2.3 1.6-4 .3-1.7.3-2.8.8-4.7.4-1.6.8-2.6.8-4.2C20 4.9 18.6 3.2 16.5 3.2c-1.7 0-2.6.9-4.5.9s-2.8-.9-4.5-.9Z"/>
+        </svg>
+      </span>
+      <div class="brand-text">
+        <h1>DentPilot</h1>
+        <p>إدارة مرضى — <span id="docLabel">د. —</span></p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="installBtn" class="icon-btn install-btn" title="تثبيت التطبيق" aria-label="تثبيت التطبيق" hidden>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      </button>
+      <button id="bellBtn" class="icon-btn" title="فحص المواعيد القريبة" aria-label="المواعيد القريبة">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <span id="bellCount" class="bell-count" hidden>0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- شريط تنبيهات المواعيد -->
+  <section id="alertBanner" class="alert-banner" hidden>
+    <div class="alert-head">
+      <strong>تنبيه المواعيد القريبة للجلسة الثانية</strong>
+      <button id="alertClose" class="alert-close" aria-label="إغلاق التنبيه">✕</button>
+    </div>
+    <ul id="alertList" class="alert-list"></ul>
+  </section>
+
+  <div id="trialBanner" class="trial-banner" hidden>
+    <span class="tb-ico">⏳</span>
+    <span id="trialText">الفترة التجريبية المجانية متاحة لمدة 3 أيام.</span>
+  </div>
+
+  <main class="wrap" id="app">
+
+    <!-- ============ لوحة التحكم ============ -->
+    <section class="view" id="view-dashboard" data-view="dashboard">
+      <div class="dash-grid">
+        <button class="dash-card" data-go="patients"><span class="dash-emoji">👥</span><span class="dash-info"><span class="dash-title">المرضى</span><span class="dash-count" id="dcPatients">0</span></span></button>
+        <button class="dash-card" data-go="today"><span class="dash-emoji">📅</span><span class="dash-info"><span class="dash-title">مواعيد اليوم</span><span class="dash-count" id="dcToday">0</span></span></button>
+        <button class="dash-card warn" data-go="late"><span class="dash-emoji">⚠️</span><span class="dash-info"><span class="dash-title">المواعيد المتأخرة</span><span class="dash-count" id="dcLate">0</span></span></button>
+        <button class="dash-card" data-go="stats"><span class="dash-emoji">📊</span><span class="dash-info"><span class="dash-title">الإحصائيات</span><span class="dash-sub">عرض</span></span></button>
+        <button class="dash-card" data-go="reports"><span class="dash-emoji">📄</span><span class="dash-info"><span class="dash-title">التقارير</span><span class="dash-sub">عرض</span></span></button>
+        <button class="dash-card" data-go="backup"><span class="dash-emoji">💾</span><span class="dash-info"><span class="dash-title">النسخة الاحتياطية</span><span class="dash-sub">حفظ/استعادة</span></span></button>
+        <button class="dash-card" data-go="settings"><span class="dash-emoji">⚙️</span><span class="dash-info"><span class="dash-title">الإعدادات</span><span class="dash-sub">تعديل</span></span></button>
+        <button class="dash-card" data-go="support"><span class="dash-emoji">🎫</span><span class="dash-info"><span class="dash-title">الدعم والتفعيل</span><span class="dash-sub">عرض</span></span></button>
+        <button class="dash-card accent" data-go="add"><span class="dash-emoji">➕</span><span class="dash-info"><span class="dash-title">إضافة مريض</span><span class="dash-sub">جديد</span></span></button>
+      </div>
+      <div class="section-head" id="todaySection"><h2>📅 مواعيد اليوم</h2></div>
+      <div id="todayList" class="appt-list"></div>
+    </section>
+
+    <!-- ============ جميع المرضى ============ -->
+    <section class="view" id="view-patients" data-view="patients" hidden>
+      <div class="page-head">
+        <h2>👥 المرضى الحاليون</h2>
+        <div class="page-tools">
+          <div class="search-box sm">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="search" id="searchInput" placeholder="بحث…" autocomplete="off" />
+          </div>
+          <button id="completedBtn" class="btn btn-ghost">✅ المكتملون <span id="completedCount">0</span></button>
+          <button id="addBtn" class="btn btn-primary">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            إضافة مريض
+          </button>
+        </div>
+      </div>
+      <div id="patientsList" class="cards-grid"></div>
+      <div id="emptyState" class="empty-state" hidden>
+        <p>لا يوجد مرضى مسجّلون بعد.</p>
+        <span>اضغط «إضافة مريض» لبدء تسجيل أول مريض.</span>
+      </div>
+    </section>
+
+    <!-- ============ المرضى المكتملون ============ -->
+    <section class="view" id="view-completed" data-view="completed" hidden>
+      <div class="page-head"><h2>✅ المرضى المكتملون</h2></div>
+      <div id="completedList" class="cards-grid"></div>
+      <div id="completedEmpty" class="empty-state" hidden>
+        <p>لا يوجد مرضى مكتملون بعد.</p>
+        <span>عند إنهاء علاج مريض سيُؤرشَف هنا مع كامل بياناته.</span>
+      </div>
+    </section>
+
+    <!-- ============ المواعيد المتأخرة ============ -->
+    <section class="view" id="view-late" data-view="late" hidden>
+      <div class="page-head"><h2>⚠️ المواعيد المتأخرة</h2></div>
+      <div id="lateList" class="cards-grid"></div>
+      <div id="lateEmpty" class="empty-state" hidden>
+        <p>لا توجد مواعيد متأخرة.</p>
+        <span>جميع المواعيد ضمن الجدول الزمني.</span>
+      </div>
+    </section>
+
+    <!-- ============ الإحصائيات ============ -->
+    <section class="view" id="view-stats" data-view="stats" hidden>
+      <div class="page-head"><h2>📊 الإحصائيات</h2></div>
+      <div id="statsContent" class="stats-grid"></div>
+    </section>
+
+    <!-- ============ التقارير ============ -->
+    <section class="view" id="view-reports" data-view="reports" hidden>
+      <div class="page-head"><h2>📄 التقارير</h2></div>
+      <div id="reportsContent"></div>
+    </section>
+
+    <!-- ============ النسخة الاحتياطية ============ -->
+    <section class="view" id="view-backup" data-view="backup" hidden>
+      <div class="page-head"><h2>💾 النسخة الاحتياطية</h2></div>
+      <div class="backup-card">
+        <p>احفظ نسخة من كل بياناتك في ملف، أو استعد بياناتك من ملف سابق. تبقى البيانات محلية على جهازك.</p>
+        <div class="backup-actions">
+          <button id="exportBtn" class="btn btn-primary">⬇ تصدير نسخة احتياطية</button>
+          <button id="importBtn" class="btn btn-ghost">⬆ استيراد نسخة</button>
+          <input type="file" id="importFile" accept="application/json" hidden />
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ الدعم والتفعيل ============ -->
+    <section class="view" id="view-support" data-view="support" hidden>
+      <div class="page-head"><h2>🎫 الدعم والتفعيل</h2></div>
+      <div id="supportBody"></div>
+    </section>
+
+    <!-- ============ ملف المريض ============ -->
+    <section class="view" id="view-file" data-view="file" hidden>
+      <div id="fileBody"></div>
+    </section>
+
+  </main>
+
+  <!-- نافذة إضافة/تعديل المريض -->
+  <div id="modalOverlay" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h2 id="modalTitle">إضافة مريض جديد</h2>
+        <button id="modalClose" class="modal-close" aria-label="إغلاق">✕</button>
+      </div>
+      <form id="patientForm" class="form" novalidate>
+        <input type="hidden" id="patientId" />
+        <p class="form-section">بيانات المريض</p>
+        <div class="grid-2">
+          <div class="field"><label for="name">اسم المريض</label><input type="text" id="name" required placeholder="الاسم الكامل" /></div>
+          <div class="field"><label for="phone">رقم الهاتف</label><input type="tel" id="phone" inputmode="tel" placeholder="0900000000" /></div>
+        </div>
+        <p class="form-section">تفاصيل العلاج</p>
+        <div class="grid-2">
+          <div class="field"><label for="treatment">العمل / نوع العلاج</label><input type="text" id="treatment" placeholder="مثال: حشو، تنظيف، تقويم…" /></div>
+          <div class="field"><label for="session">الجلسة</label><input type="text" id="session" placeholder="مثال: الأولى / الثانية" /></div>
+        </div>
+        <div class="field"><label for="secondSession">تاريخ ووقت الجلسة الثانية</label><input type="datetime-local" id="secondSession" /></div>
+        <p class="form-section">التفاصيل المالية</p>
+        <div class="grid-3">
+          <div class="field"><label for="total">المبلغ كامل</label><input type="number" id="total" min="0" step="any" placeholder="0" /></div>
+          <div class="field"><label for="paid">المدفوع</label><input type="number" id="paid" min="0" step="any" placeholder="0" /></div>
+          <div class="field"><label for="remaining">المتبقي (تلقائي)</label><input type="text" id="remaining" value="0" readonly /></div>
+        </div>
+        <p class="form-section">ملاحظات</p>
+        <div class="field"><textarea id="notes" rows="3" placeholder="ملاحظات عامة عن المريض (اختياري)"></textarea></div>
+        <div class="form-actions">
+          <button type="button" id="cancelBtn" class="btn btn-ghost">إلغاء</button>
+          <button type="submit" class="btn btn-primary">حفظ البيانات</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- نافذة الجلسة -->
+  <div id="sessionOverlay" class="modal-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sessionTitle">
+      <div class="modal-head">
+        <h2 id="sessionTitle">إضافة جلسة</h2>
+        <button id="sessionClose" class="modal-close" aria-label="إغلاق">✕</button>
+      </div>
+      <form id="sessionForm" class="form" novalidate>
+        <input type="hidden" id="sessPatientId" />
+        <input type="hidden" id="sessId" />
+        <div class="grid-3">
+          <div class="field"><label for="sessNumber">رقم الجلسة</label><input type="text" id="sessNumber" inputmode="numeric" placeholder="1" /></div>
+          <div class="field"><label for="sessDate">التاريخ</label><input type="date" id="sessDate" /></div>
+          <div class="field"><label for="sessTime">الوقت</label><input type="time" id="sessTime" /></div>
+        </div>
+        <div class="field"><label for="sessTreatment">العلاج المنفَّذ</label><input type="text" id="sessTreatment" placeholder="مثال: حشو ضرس، خلع، تنظيف…" /></div>
+        <div class="grid-2">
+          <div class="field"><label for="sessPaid">المبلغ المدفوع في هذه الجلسة</label><input type="number" id="sessPaid" min="0" step="any" placeholder="0" /></div>
+          <div class="field"><label for="sessNext">الموعد القادم</label><input type="datetime-local" id="sessNext" /></div>
+        </div>
+        <div class="field"><label for="sessNotes">ملاحظات</label><input type="text" id="sessNotes" placeholder="ملاحظات الجلسة (اختياري)" /></div>
+        <label class="check-field"><input type="checkbox" id="sessCompleted" /> <span>تم إنجاز هذه الجلسة</span></label>
+        <div class="form-actions">
+          <button type="button" id="sessionCancel" class="btn btn-ghost">إلغاء</button>
+          <button type="submit" class="btn btn-primary">حفظ الجلسة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- تأكيد عام (حذف/إنهاء/استعادة) -->
+  <div id="confirmOverlay" class="modal-overlay" hidden>
+    <div class="modal modal-sm" role="alertdialog" aria-modal="true">
+      <div class="modal-head"><h2 id="confirmTitle">تأكيد</h2></div>
+      <p class="confirm-text" id="confirmText">هل أنت متأكد؟</p>
+      <div class="form-actions">
+        <button type="button" id="confirmCancel" class="btn btn-ghost">إلغاء</button>
+        <button type="button" id="confirmOk" class="btn btn-danger">تأكيد</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- معاينة المرفقات (صور) داخل التطبيق -->
+  <div id="attLightbox" class="att-lightbox" hidden>
+    <div class="att-lb-bar">
+      <span id="attLbName" class="att-lb-name">—</span>
+      <button type="button" id="attLbClose" class="att-lb-close" aria-label="إغلاق">✕</button>
+    </div>
+    <div class="att-lb-stage"><img id="attLbImg" src="" alt="" /></div>
+  </div>
+
+  <!-- منطقة الطباعة (تظهر عند الطباعة فقط) -->
+  <div id="printArea" aria-hidden="true"></div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <footer class="footer">
+    <span>DentPilot — جميع البيانات محفوظة محلياً على هذا الجهاز.</span>
+  </footer>
+
+  <div id="updateOverlay" class="modal-overlay" hidden>
+    <div class="modal modal-sm" role="alertdialog" aria-modal="true">
+      <div class="modal-head"><h2>🔄 يتوفّر تحديث</h2></div>
+      <p class="confirm-text">صدر إصدار جديد من DentPilot. حدّث الآن للحصول على آخر التحسينات — لن تُفقد أي من بياناتك.</p>
+      <div class="form-actions"><button type="button" id="updateLaterBtn" class="btn btn-ghost">لاحقاً</button><button type="button" id="updateNowBtn" class="btn btn-primary">تحديث الآن</button></div>
+    </div>
+  </div>
+
+  <script src="activation.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
