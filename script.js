@@ -48,7 +48,7 @@
   };
 
   const $ = (id) => document.getElementById(id);
-  const APP_VERSION = '2.3.0';
+  const APP_VERSION = '2.4.1';
   const els = {
     splash: $('splash'), backBtn: $('backBtn'), installBtn: $('installBtn'), docLabel: $('docLabel'),
     trialBanner: $('trialBanner'), trialText: $('trialText'),
@@ -58,6 +58,9 @@
     doctorOverlay: $('doctorOverlay'), doctorForm: $('doctorForm'), doctorClose: $('doctorClose'),
     doctorCancel: $('doctorCancel'), doctorTitle: $('doctorTitle'), doctorHint: $('doctorHint'),
     docName: $('docName'), docSpecialty: $('docSpecialty'), docClinic: $('docClinic'),
+    // عناصر بصرية إضافية للصفحة الرئيسية فقط (لا تغيّر أي منطق — عرض فقط)
+    heroDoctorName: $('heroDoctorName'), heroMeta: $('heroMeta'),
+    trialHours: $('trialHours'), trialRingFg: $('trialRingFg'),
     // لوحة التحكم
     dcPatients: $('dcPatients'), dcToday: $('dcToday'), dcLate: $('dcLate'), todayList: $('todayList'),
     // المرضى
@@ -76,6 +79,34 @@
     cancelBtn: $('cancelBtn'), form: $('patientForm'),
     fId: $('patientId'), fName: $('name'), fTreatment: $('treatment'), fSession: $('session'),
     fPhone: $('phone'), fTotal: $('total'), fPaid: $('paid'), fRemaining: $('remaining'), fSecond: $('secondSession'), fNotes: $('notes'),
+    pickContactBtn: $('pickContactBtn'),
+    // بيانات ديموغرافية إضافية (متوافقة الإضافة — لا تمسّ الحقول القديمة)
+    fAge: $('age'), fGender: $('gender'), genderChips: $('genderChips'),
+    // حقل «نوع العمل» المخصّص (Treatment Picker)
+    treatmentTrigger: $('treatmentTrigger'), treatmentDisplay: $('treatmentDisplay'),
+    treatmentOtherWrap: $('treatmentOtherWrap'), treatmentOther: $('treatmentOther'),
+    treatmentPicker: $('treatmentPicker'), tpickBackdrop: $('tpickBackdrop'), tpickClose: $('tpickClose'),
+    // لوحة الاختيار العامة (تُستخدم لكل الحقول الفرعية الديناميكية)
+    genericPicker: $('genericPicker'), gpickBackdrop: $('gpickBackdrop'), gpickClose: $('gpickClose'),
+    gpickTitle: $('gpickTitle'), gpickList: $('gpickList'),
+    // الحقول الديناميكية حسب نوع الحالة
+    clinicalSection: $('clinicalSection'),
+    opTooth: $('opTooth'), opClassTrigger: $('opClassTrigger'), opClassDisplay: $('opClassDisplay'), opClass: $('opClass'),
+    opClassOtherWrap: $('opClassOtherWrap'), opClassOther: $('opClassOther'),
+    opMaterialTrigger: $('opMaterialTrigger'), opMaterialDisplay: $('opMaterialDisplay'), opMaterial: $('opMaterial'),
+    opMaterialOtherWrap: $('opMaterialOtherWrap'), opMaterialOther: $('opMaterialOther'),
+    endoTooth: $('endoTooth'), endoDiagnosisTrigger: $('endoDiagnosisTrigger'), endoDiagnosisDisplay: $('endoDiagnosisDisplay'), endoDiagnosis: $('endoDiagnosis'),
+    canalsList: $('canalsList'), addCanalBtn: $('addCanalBtn'),
+    cleanProcTrigger: $('cleanProcTrigger'), cleanProcDisplay: $('cleanProcDisplay'), cleanProc: $('cleanProc'),
+    cleanProcOtherWrap: $('cleanProcOtherWrap'), cleanProcOther: $('cleanProcOther'),
+    gumStatusChips: $('gumStatusChips'), gumStatus: $('gumStatus'), calculusNotes: $('calculusNotes'),
+    orthoVisitTrigger: $('orthoVisitTrigger'), orthoVisitDisplay: $('orthoVisitDisplay'), orthoVisit: $('orthoVisit'),
+    orthoDiagnosis: $('orthoDiagnosis'), orthoNotes: $('orthoNotes'),
+    surgTooth: $('surgTooth'), surgProcTrigger: $('surgProcTrigger'), surgProcDisplay: $('surgProcDisplay'), surgProc: $('surgProc'),
+    surgProcOtherWrap: $('surgProcOtherWrap'), surgProcOther: $('surgProcOther'), surgPostOp: $('surgPostOp'),
+    reviewReason: $('reviewReason'), reviewResult: $('reviewResult'), reviewNotes: $('reviewNotes'),
+    pedTooth: $('pedTooth'), pedTreatTrigger: $('pedTreatTrigger'), pedTreatDisplay: $('pedTreatDisplay'), pedTreat: $('pedTreat'),
+    pedBehaviorChips: $('pedBehaviorChips'), pedBehavior: $('pedBehavior'), guardianNotes: $('guardianNotes'),
     // نافذة الجلسة
     sessionOverlay: $('sessionOverlay'), sessionForm: $('sessionForm'), sessionTitle: $('sessionTitle'),
     sessionClose: $('sessionClose'), sessionCancel: $('sessionCancel'),
@@ -629,7 +660,6 @@
       </div>
 
       ${sessionsSection(p)}
-      ${timelineSection(p)}
       ${paymentsSection(p)}
       ${attachmentsSection(p)}
     `;
@@ -666,43 +696,56 @@
     </div>`;
   }
 
-  /* ---------- الخط الزمني (عرض رأسي) ---------- */
-  function timelineSection(p) {
-    const list = (p.sessions || []).slice().sort((a, b) => (new Date(sessionDateTime(a) || 0) - new Date(sessionDateTime(b) || 0)) || (toNum(a.number) - toNum(b.number)));
-    const nodes = list.length ? `<div class="timeline">${list.map(s => `
-      <div class="tl-node ${s.completed ? 'done' : ''}">
-        <span class="tl-marker">${s.completed ? '✓' : (escapeHtml(s.number) || '•')}</span>
-        <div class="tl-card">
-          <div class="tl-title">جلسة ${escapeHtml(s.number) || ''}${s.treatment ? ' — ' + escapeHtml(s.treatment) : ''}</div>
-          <div class="tl-meta">${escapeHtml(fmtDate(s.date))}${s.date ? ' • ' + escapeHtml(weekday(s.date)) : ''}${s.time ? ' • ' + escapeHtml(s.time) : ''}</div>
-          <div class="tl-pay">💵 مدفوع: ${fmt(toNum(s.paid))}</div>
-          ${s.notes ? `<div class="tl-sub">📝 ${escapeHtml(s.notes)}</div>` : ''}
-        </div>
-      </div>`).join('')}</div>` : '<div class="sub-empty">لا توجد جلسات لعرضها في الخط الزمني بعد.</div>';
-
-    return `<div class="file-section">
-      <div class="fs-head"><span class="fs-ico">📈</span><h3>الخط الزمني للعلاج</h3></div>
-      <div class="fs-body">${nodes}</div>
-    </div>`;
+  /* ---------- سجل الدفعات: جدول حي مشتق من الجلسات الفعلية ----------
+     مصدر البيانات بالكامل: p.paid (الدفعة المبدئية) + كل جلسة s.paid/s.date/
+     s.time/s.number/s.treatment/s.notes الموجودة أصلاً — لا تخزين جديد، لا
+     تغيير في طريقة حفظ الجلسات، فقط اشتقاق وعرض. ترتيب تصاعدي (الأقدم أولاً)
+     مع حساب «المتبقي» تراكمياً بعد كل دفعة. ---------- */
+  function paymentsTableRows(p) {
+    const cost = toNum(p.total);
+    const reg = regDateFromId(p.id);
+    const rows = [];
+    if (toNum(p.paid) > 0) {
+      rows.push({ date: reg ? reg.toISOString() : '', sessionNum: '—', treatment: p.treatment || '—', amount: toNum(p.paid), notes: 'دفعة مبدئية عند التسجيل' });
+    }
+    (p.sessions || []).slice()
+      .sort((a, b) => (new Date(sessionDateTime(a) || 0) - new Date(sessionDateTime(b) || 0)) || (toNum(a.number) - toNum(b.number)))
+      .forEach(s => {
+        if (toNum(s.paid) > 0) {
+          rows.push({ date: sessionDateTime(s), sessionNum: s.number || '—', treatment: s.treatment || p.treatment || '—', amount: toNum(s.paid), notes: s.notes || '' });
+        }
+      });
+    rows.sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
+    let running = 0;
+    return rows.map(r => { running += r.amount; return Object.assign({}, r, { remainingAfter: cost - running }); });
   }
 
-  /* ---------- سجل الدفعات (مشتق، الأحدث أولاً) ---------- */
+  /* ---------- سجل الدفعات (جدول حي، الأقدم أولاً، مرتبط بالجلسات) ---------- */
   function paymentsSection(p) {
-    const list = patientPayments(p);
-    const body = list.length ? list.map(pay => `
-      <div class="pay-row">
-        <span class="pay-amount">${fmt(pay.amount)}</span>
-        <span class="pay-meta">
-          <span class="pay-date">${escapeHtml(fmtDate(pay.date))}${pay.date ? ' • ' + escapeHtml(weekday(pay.date)) : ''}</span>
-          <span class="pay-num">جلسة: ${escapeHtml(String(pay.num))}</span>
-          ${pay.notes ? '<span class="pay-note">' + escapeHtml(pay.notes) + '</span>' : ''}
-        </span>
-      </div>`).join('') : '<div class="sub-empty">لا توجد دفعات مسجّلة بعد. تُسجَّل الدفعات تلقائياً عند إضافة المبلغ المدفوع في الجلسة.</div>';
+    const rows = paymentsTableRows(p);
+    const tt = patientTotals(p);
+    const summary = `<div class="pay-summary">
+      <div class="pay-sum-item"><span>تكلفة العلاج</span><b>${fmt(tt.cost)}</b></div>
+      <div class="pay-sum-item"><span>إجمالي المدفوع</span><b class="ok">${fmt(tt.paid)}</b></div>
+      <div class="pay-sum-item"><span>المتبقي</span><b class="${tt.remaining > 0 ? 'due' : 'ok'}">${fmt(tt.remaining)}</b></div>
+    </div>`;
+    const body = rows.length ? `<div class="pay-table">${rows.map(r => `
+      <div class="pay-trow">
+        <div class="pay-trow-top">
+          <span class="pay-date-badge">${escapeHtml(fmtDate(r.date))}${r.date ? ' • ' + escapeHtml(weekday(r.date)) : ''}</span>
+          <span class="pay-sess-badge">جلسة ${escapeHtml(String(r.sessionNum))}</span>
+        </div>
+        <div class="pay-trow-treat">${escapeHtml(r.treatment)}</div>
+        <div class="pay-trow-bottom">
+          <span class="pay-paid">مدفوع: <b>${fmt(r.amount)}</b></span>
+          <span class="pay-remain">المتبقي بعدها: <b>${fmt(r.remainingAfter)}</b></span>
+        </div>
+        ${r.notes ? `<div class="pay-trow-notes">${escapeHtml(r.notes)}</div>` : ''}
+      </div>`).join('')}</div>` : '<div class="sub-empty">لا توجد دفعات مسجّلة بعد. تُسجَّل الدفعات تلقائياً عند إضافة المبلغ المدفوع في الجلسة.</div>';
 
-    const totalPaid = patientTotals(p).paid;
     return `<div class="file-section">
-      <div class="fs-head"><span class="fs-ico">💳</span><h3>سجل الدفعات</h3><span class="fs-badge">${fmt(totalPaid)}</span></div>
-      <div class="fs-body">${body}</div>
+      <div class="fs-head"><span class="fs-ico">💳</span><h3>سجل الدفعات</h3><span class="fs-badge">${fmt(tt.paid)}</span></div>
+      <div class="fs-body">${summary}${body}</div>
     </div>`;
   }
 
@@ -916,6 +959,7 @@
   function applyRoute() {
     const { name, param } = parseHash();
     currentView = name; currentParam = param;
+    document.body.dataset.route = name; // لربط تصميم الصفحة الرئيسية فقط عبر CSS، دون أي تغيير منطقي
     document.querySelectorAll('.view').forEach(v => { v.hidden = v.dataset.view !== name; });
     els.backBtn.hidden = (name === 'dashboard');
     renderActiveView();
@@ -941,6 +985,15 @@
   function applyDoctorLabel() {
     els.docLabel.textContent = settings.doctorName ? ('د. ' + settings.doctorName) : 'د. —';
     if (settings.specialty) els.docLabel.title = settings.specialty;
+    // عرض بيانات الطبيب داخل الكرت الرئيسي العلوي (Hero) — بصري فقط، نفس بيانات الإعدادات
+    if (els.heroDoctorName) {
+      els.heroDoctorName.textContent = settings.doctorName ? ('د. ' + settings.doctorName) : 'DentPilot';
+    }
+    if (els.heroMeta) {
+      var metaParts = [settings.clinic, settings.specialty].filter(Boolean);
+      els.heroMeta.textContent = metaParts.join(' — ');
+      els.heroMeta.hidden = metaParts.length === 0;
+    }
   }
   function openDoctor(editable) {
     els.docName.value = settings.doctorName || ''; els.docSpecialty.value = settings.specialty || ''; els.docClinic.value = settings.clinic || '';
@@ -974,18 +1027,397 @@
   /* ============================================================
      نافذة المريض (إضافة/تعديل)
      ============================================================ */
+  /* ============================================================
+     حقل «نوع العمل» المخصّص (Treatment Picker)
+     ------------------------------------------------------------
+     عرض بصري/تفاعلي فقط. القيمة الفعلية المحفوظة تبقى دائماً في
+     نفس الحقل المخفي #treatment (els.fTreatment) الذي تقرأ منه
+     handleSubmit كما كان تماماً — لا تغيير في منطق الحفظ.
+     ============================================================ */
+  const TREATMENT_PRESETS = ['Operative', 'Endo', 'Orthodontics', 'Cleaning', 'Surgery', 'Review', 'Pediatric'];
+
+  /* ============================================================
+     الحقول الديناميكية حسب نوع الحالة (Clinical Details)
+     ------------------------------------------------------------
+     ميزة إضافية بالكامل: تُخزَّن في مفتاح جديد اختياري
+     patient.clinicalDetails — لا تمسّ أياً من الحقول القديمة
+     (name/treatment/session/phone/total/paid/secondSession/notes)
+     ولا تغيّر طريقة القراءة/الكتابة الخاصة بها. المرضى القدامى
+     الذين لا يملكون هذا المفتاح يعملون تماماً كما كانوا.
+     ============================================================ */
+  const CLASS_OPTIONS = ['Class I', 'Class II', 'Class III', 'Class IV', 'Class V', 'Class VI'];
+  const MATERIAL_OPTIONS = ['Composite', 'Amalgam', 'GIC', 'Temporary filling'];
+  const DIAGNOSIS_OPTIONS = ['Normal pulp', 'Reversible pulpitis', 'Irreversible pulpitis', 'Necrosis', 'Previously treated', 'Retreatment'];
+  const CANAL_NAME_OPTIONS = ['Single', 'MB', 'DB', 'ML', 'DL', 'Palatal', 'Distal', 'Mesial', 'Buccal', 'Lingual'];
+  const CLEANING_PROC_OPTIONS = ['Scaling', 'Polishing', 'Scaling + Polishing', 'Fluoride application'];
+  const ORTHO_VISIT_OPTIONS = ['Bracket bonding', 'Wire change', 'Activation', 'Retainer check', 'Emergency', 'Consultation'];
+  const SURGERY_PROC_OPTIONS = ['Simple extraction', 'Surgical extraction', 'Implant', 'Biopsy'];
+  const PEDIATRIC_TREAT_OPTIONS = ['Examination', 'Fluoride', 'Sealant', 'Filling', 'Pulpotomy', 'Pulpectomy', 'Extraction', 'Space maintainer'];
+
+  let canalsState = []; // حالة القنوات الحالية داخل النموذج المفتوح فقط (لا تُحفظ إلا عند الحفظ الفعلي)
+  let canalUid = 0;
+  let gpickCurrentSelect = null; // دالة رد نداء تُستدعى عند اختيار عنصر من اللوحة العامة
+
+  /* ---------- لوحة الاختيار العامة (تُستخدم لكل الحقول الفرعية) ---------- */
+  function openGenericPicker(title, options, currentVal, onSelect) {
+    if (!els.genericPicker) return;
+    els.gpickTitle.textContent = title;
+    els.gpickList.innerHTML = options.map(o =>
+      `<button type="button" class="tpick-opt" role="option" data-val="${escapeHtml(o)}" aria-selected="${o === currentVal ? 'true' : 'false'}">${escapeHtml(o)}</button>`
+    ).join('');
+    els.gpickList.querySelectorAll('.tpick-opt').forEach(btn => {
+      if (btn.dataset.val === currentVal) btn.classList.add('active');
+      btn.addEventListener('click', () => { onSelect(btn.dataset.val); closeGenericPicker(); });
+    });
+    gpickCurrentSelect = onSelect;
+    els.genericPicker.hidden = false;
+    document.body.classList.add('sheet-open');
+  }
+  function closeGenericPicker() {
+    if (!els.genericPicker) return;
+    els.genericPicker.hidden = true;
+    gpickCurrentSelect = null;
+    document.body.classList.remove('sheet-open');
+  }
+
+  /* ---------- ربط عام: زر مُشغِّل + حقل مخفي + (اختياري) حقل "أخرى" ---------- */
+  function wireOptionField(triggerEl, displayEl, hiddenEl, options, title, otherWrapEl, otherInputEl) {
+    if (!triggerEl) return;
+    triggerEl.addEventListener('click', () => {
+      openGenericPicker(title, options, hiddenEl.value, (val) => {
+        hiddenEl.value = val;
+        displayEl.textContent = val;
+        displayEl.classList.remove('placeholder');
+        if (otherWrapEl) { otherWrapEl.hidden = true; otherInputEl.value = ''; }
+      });
+    });
+  }
+  function setOptionFieldUI(displayEl, hiddenEl, placeholder, value) {
+    const v = (value || '').trim();
+    hiddenEl.value = v;
+    displayEl.textContent = v || placeholder;
+    displayEl.classList.toggle('placeholder', !v);
+  }
+
+  /* ---------- حقول ذات خيار "Other" (تسلك نفس سلوك حقل نوع العمل تماماً) ---------- */
+  function wireOptionFieldWithOther(triggerEl, displayEl, hiddenEl, options, title, otherWrapEl, otherInputEl) {
+    if (!triggerEl) return;
+    triggerEl.addEventListener('click', () => {
+      const isCustom = hiddenEl.value && !options.includes(hiddenEl.value);
+      openGenericPicker(title, options.concat(['Other']), isCustom ? 'Other' : hiddenEl.value, (val) => {
+        if (val === 'Other') {
+          hiddenEl.value = '';
+          displayEl.textContent = 'Other';
+          displayEl.classList.remove('placeholder');
+          otherWrapEl.hidden = false;
+          setTimeout(() => otherInputEl.focus(), 60);
+        } else {
+          hiddenEl.value = val;
+          displayEl.textContent = val;
+          displayEl.classList.remove('placeholder');
+          otherWrapEl.hidden = true; otherInputEl.value = '';
+        }
+      });
+    });
+    otherInputEl.addEventListener('input', () => {
+      hiddenEl.value = otherInputEl.value;
+      displayEl.textContent = otherInputEl.value.trim() || 'Other';
+    });
+  }
+  function setOptionFieldWithOtherUI(displayEl, hiddenEl, placeholder, otherWrapEl, otherInputEl, options, value) {
+    const v = (value || '').trim();
+    if (!v) {
+      hiddenEl.value = ''; displayEl.textContent = placeholder; displayEl.classList.add('placeholder');
+      otherWrapEl.hidden = true; otherInputEl.value = ''; return;
+    }
+    hiddenEl.value = v; displayEl.textContent = v; displayEl.classList.remove('placeholder');
+    if (options.includes(v)) { otherWrapEl.hidden = true; otherInputEl.value = ''; }
+    else { otherWrapEl.hidden = false; otherInputEl.value = v; }
+  }
+
+  /* ---------- مجموعات الشرائح (Chips): الجنس / حالة اللثة / سلوك الطفل ---------- */
+  function wireChipGroup(groupEl, hiddenEl) {
+    if (!groupEl) return;
+    groupEl.querySelectorAll('.chip-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const already = btn.classList.contains('active');
+        groupEl.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+        if (already) { hiddenEl.value = ''; } // إعادة الضغط تُلغي الاختيار
+        else { btn.classList.add('active'); hiddenEl.value = btn.dataset.val; }
+      });
+    });
+  }
+  function setChipGroupUI(groupEl, hiddenEl, value) {
+    hiddenEl.value = value || '';
+    groupEl.querySelectorAll('.chip-btn').forEach(b => b.classList.toggle('active', b.dataset.val === value));
+  }
+
+  /* ---------- إظهار/إخفاء قسم الحقول الديناميكية حسب نوع العمل ---------- */
+  const CLINICAL_TYPES = ['Operative', 'Endo', 'Cleaning', 'Orthodontics', 'Surgery', 'Review', 'Pediatric'];
+  function showClinicalSection(type) {
+    if (!els.clinicalSection) return;
+    CLINICAL_TYPES.forEach(t => {
+      const el = $('clin-' + t);
+      if (el) el.hidden = (t !== type);
+    });
+    if (type === 'Endo' && canalsState.length === 0) addCanal();
+  }
+
+  /* ---------- إدارة القنوات (Canals) — خاصة بـ Endo فقط ---------- */
+  function addCanal(data) {
+    canalUid += 1;
+    canalsState.push(Object.assign({ _uid: canalUid, name: '', isOtherName: false, initial: '', master: '', wl: '', stop: '' }, data || {}));
+    renderCanals();
+  }
+  function removeCanal(uidVal) {
+    canalsState = canalsState.filter(c => c._uid !== uidVal);
+    renderCanals();
+  }
+  function renderCanals() {
+    if (!els.canalsList) return;
+    els.canalsList.innerHTML = canalsState.map((c, i) => {
+      const isCustom = c.isOtherName || (c.name && !CANAL_NAME_OPTIONS.includes(c.name));
+      const displayVal = c.name || (isCustom ? 'Other' : '');
+      return `
+      <div class="canal-card" data-uid="${c._uid}">
+        <div class="canal-card-head">
+          <span class="canal-card-title">Canal ${i + 1}</span>
+          <button type="button" class="canal-remove" data-uid="${c._uid}" title="حذف القناة" aria-label="حذف القناة">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+          </button>
+        </div>
+        <div class="field">
+          <label>اسم القناة</label>
+          <button type="button" class="tpick-trigger canal-name-trigger" data-uid="${c._uid}">
+            <span class="tpick-display ${displayVal ? '' : 'placeholder'}">${escapeHtml(displayVal || 'اختر اسم القناة')}</span>
+            ${'<svg class="tpick-chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'}
+          </button>
+          <div class="tpick-other-field canal-name-other-wrap" data-uid="${c._uid}" ${isCustom ? '' : 'hidden'}>
+            <input type="text" class="canal-name-other" data-uid="${c._uid}" placeholder="اكتب اسم القناة" value="${escapeHtml(c.name && isCustom ? c.name : '')}" autocomplete="off" />
+          </div>
+        </div>
+        <div class="field-row-2">
+          <div class="field"><label>Initial File</label><input type="text" class="canal-initial" data-uid="${c._uid}" value="${escapeHtml(c.initial)}" placeholder="مثال: 15" /></div>
+          <div class="field"><label>Master File</label><input type="text" class="canal-master" data-uid="${c._uid}" value="${escapeHtml(c.master)}" placeholder="مثال: 30" /></div>
+        </div>
+        <div class="field-row-2">
+          <div class="field"><label>Working Length (WL)</label><input type="text" class="canal-wl" data-uid="${c._uid}" value="${escapeHtml(c.wl)}" placeholder="مثال: 21mm" /></div>
+          <div class="field"><label>Stop</label><input type="text" class="canal-stop" data-uid="${c._uid}" value="${escapeHtml(c.stop)}" placeholder="Stop" /></div>
+        </div>
+      </div>`;
+    }).join('') || '<p class="clin-empty">لا توجد قنوات مضافة بعد.</p>';
+  }
+  function bindCanalsListEvents() {
+    if (!els.canalsList) return;
+    els.canalsList.addEventListener('click', (e) => {
+      const rm = e.target.closest('.canal-remove');
+      if (rm) { removeCanal(Number(rm.dataset.uid)); return; }
+      const trig = e.target.closest('.canal-name-trigger');
+      if (trig) {
+        const uidVal = Number(trig.dataset.uid);
+        const c = canalsState.find(x => x._uid === uidVal); if (!c) return;
+        const isCustom = c.isOtherName || (c.name && !CANAL_NAME_OPTIONS.includes(c.name));
+        openGenericPicker('اسم القناة', CANAL_NAME_OPTIONS.concat(['Other']), isCustom ? 'Other' : c.name, (val) => {
+          if (val === 'Other') { c.name = ''; c.isOtherName = true; renderCanals(); setTimeout(() => { const inp = els.canalsList.querySelector(`.canal-name-other[data-uid="${uidVal}"]`); if (inp) inp.focus(); }, 60); }
+          else { c.name = val; c.isOtherName = false; renderCanals(); }
+        });
+      }
+    });
+    els.canalsList.addEventListener('input', (e) => {
+      const t = e.target; const uidVal = Number(t.dataset.uid); if (!uidVal) return;
+      const c = canalsState.find(x => x._uid === uidVal); if (!c) return;
+      if (t.classList.contains('canal-name-other')) { c.name = t.value; }
+      else if (t.classList.contains('canal-initial')) { c.initial = t.value; }
+      else if (t.classList.contains('canal-master')) { c.master = t.value; }
+      else if (t.classList.contains('canal-wl')) { c.wl = t.value; }
+      else if (t.classList.contains('canal-stop')) { c.stop = t.value; }
+    });
+    els.addCanalBtn.addEventListener('click', () => addCanal());
+  }
+
+  /* ---------- جمع الحقول الديناميكية عند الحفظ ---------- */
+  function collectClinicalDetails() {
+    const type = els.fTreatment.value.trim();
+    if (type === 'Operative') {
+      return { type, tooth: els.opTooth.value.trim(), class: els.opClass.value.trim(), material: els.opMaterial.value.trim() };
+    }
+    if (type === 'Endo') {
+      return {
+        type, tooth: els.endoTooth.value.trim(), diagnosis: els.endoDiagnosis.value.trim(),
+        canals: canalsState.map(c => ({ name: c.name.trim(), initial: c.initial.trim(), master: c.master.trim(), wl: c.wl.trim(), stop: c.stop.trim() }))
+          .filter(c => c.name || c.initial || c.master || c.wl || c.stop),
+      };
+    }
+    if (type === 'Cleaning') {
+      return { type, procedure: els.cleanProc.value.trim(), gumStatus: els.gumStatus.value.trim(), calculusNotes: els.calculusNotes.value.trim() };
+    }
+    if (type === 'Orthodontics') {
+      return { type, visit: els.orthoVisit.value.trim(), diagnosis: els.orthoDiagnosis.value.trim(), notes: els.orthoNotes.value.trim() };
+    }
+    if (type === 'Surgery') {
+      return { type, tooth: els.surgTooth.value.trim(), procedure: els.surgProc.value.trim(), postOp: els.surgPostOp.value.trim() };
+    }
+    if (type === 'Review') {
+      return { type, reason: els.reviewReason.value.trim(), result: els.reviewResult.value.trim(), notes: els.reviewNotes.value.trim() };
+    }
+    if (type === 'Pediatric') {
+      return { type, tooth: els.pedTooth.value.trim(), treatment: els.pedTreat.value.trim(), behavior: els.pedBehavior.value.trim(), guardianNotes: els.guardianNotes.value.trim() };
+    }
+    return null; // Other أو غير محدَّد: بلا حقول ديناميكية إضافية
+  }
+
+  /* ---------- تعبئة الحقول الديناميكية عند التعديل ---------- */
+  function fillClinicalDetails(cd) {
+    const d = cd || {};
+    setOptionFieldUI(els.opClassDisplay, els.opClass, 'اختر Class', ''); // إعادة ضبط أولاً
+    els.opTooth.value = ''; els.opMaterial.value = ''; els.opMaterialOtherWrap.hidden = true; els.opMaterialOther.value = '';
+    els.opClassOtherWrap.hidden = true; els.opClassOther.value = '';
+    els.endoTooth.value = ''; setOptionFieldUI(els.endoDiagnosisDisplay, els.endoDiagnosis, 'اختر التشخيص', '');
+    els.cleanProc.value = ''; els.cleanProcOtherWrap.hidden = true; els.cleanProcOther.value = '';
+    setChipGroupUI(els.gumStatusChips, els.gumStatus, ''); els.calculusNotes.value = '';
+    setOptionFieldUI(els.orthoVisitDisplay, els.orthoVisit, 'اختر نوع الزيارة', ''); els.orthoDiagnosis.value = ''; els.orthoNotes.value = '';
+    els.surgTooth.value = ''; els.surgProc.value = ''; els.surgProcOtherWrap.hidden = true; els.surgProcOther.value = ''; els.surgPostOp.value = '';
+    els.reviewReason.value = ''; els.reviewResult.value = ''; els.reviewNotes.value = '';
+    els.pedTooth.value = ''; setOptionFieldUI(els.pedTreatDisplay, els.pedTreat, 'اختر نوع العلاج', '');
+    setChipGroupUI(els.pedBehaviorChips, els.pedBehavior, ''); els.guardianNotes.value = '';
+    canalsState = []; canalUid = 0;
+
+    if (d.type === 'Operative') {
+      els.opTooth.value = d.tooth || '';
+      setOptionFieldWithOtherUI(els.opClassDisplay, els.opClass, 'اختر Class', els.opClassOtherWrap, els.opClassOther, CLASS_OPTIONS, d.class || '');
+      setOptionFieldWithOtherUI(els.opMaterialDisplay, els.opMaterial, 'اختر المادة', els.opMaterialOtherWrap, els.opMaterialOther, MATERIAL_OPTIONS, d.material || '');
+    } else if (d.type === 'Endo') {
+      els.endoTooth.value = d.tooth || '';
+      setOptionFieldUI(els.endoDiagnosisDisplay, els.endoDiagnosis, 'اختر التشخيص', d.diagnosis || '');
+      (d.canals || []).forEach(c => addCanal(c));
+    } else if (d.type === 'Cleaning') {
+      setOptionFieldWithOtherUI(els.cleanProcDisplay, els.cleanProc, 'اختر نوع الإجراء', els.cleanProcOtherWrap, els.cleanProcOther, CLEANING_PROC_OPTIONS, d.procedure || '');
+      setChipGroupUI(els.gumStatusChips, els.gumStatus, d.gumStatus || '');
+      els.calculusNotes.value = d.calculusNotes || '';
+    } else if (d.type === 'Orthodontics') {
+      setOptionFieldUI(els.orthoVisitDisplay, els.orthoVisit, 'اختر نوع الزيارة', d.visit || '');
+      els.orthoDiagnosis.value = d.diagnosis || ''; els.orthoNotes.value = d.notes || '';
+    } else if (d.type === 'Surgery') {
+      els.surgTooth.value = d.tooth || '';
+      setOptionFieldWithOtherUI(els.surgProcDisplay, els.surgProc, 'اختر نوع الإجراء', els.surgProcOtherWrap, els.surgProcOther, SURGERY_PROC_OPTIONS, d.procedure || '');
+      els.surgPostOp.value = d.postOp || '';
+    } else if (d.type === 'Review') {
+      els.reviewReason.value = d.reason || ''; els.reviewResult.value = d.result || ''; els.reviewNotes.value = d.notes || '';
+    } else if (d.type === 'Pediatric') {
+      els.pedTooth.value = d.tooth || '';
+      setOptionFieldUI(els.pedTreatDisplay, els.pedTreat, 'اختر نوع العلاج', d.treatment || '');
+      setChipGroupUI(els.pedBehaviorChips, els.pedBehavior, d.behavior || '');
+      els.guardianNotes.value = d.guardianNotes || '';
+    } else {
+      renderCanals(); // تفريغ عرض القنوات إن لم يوجد Endo
+    }
+  }
+
+  function setTreatmentUI(value) {
+    const v = (value || '').trim();
+    if (!els.treatmentDisplay) return; // حماية في حال عدم وجود العناصر
+    if (!v) {
+      els.fTreatment.value = '';
+      els.treatmentDisplay.textContent = 'اختر نوع العمل';
+      els.treatmentDisplay.classList.add('placeholder');
+      els.treatmentOtherWrap.hidden = true;
+      els.treatmentOther.value = '';
+      showClinicalSection(null);
+      return;
+    }
+    els.fTreatment.value = v;
+    els.treatmentDisplay.textContent = v;
+    els.treatmentDisplay.classList.remove('placeholder');
+    if (TREATMENT_PRESETS.includes(v)) {
+      els.treatmentOtherWrap.hidden = true;
+      els.treatmentOther.value = '';
+    } else {
+      // "Other" أو أي قيمة مخصّصة/قديمة لا تطابق القائمة الجاهزة
+      els.treatmentOtherWrap.hidden = false;
+      els.treatmentOther.value = v;
+    }
+    showClinicalSection(CLINICAL_TYPES.includes(v) ? v : null);
+  }
+
+  function highlightTreatmentOption() {
+    const cur = els.fTreatment.value.trim();
+    const isPreset = TREATMENT_PRESETS.includes(cur);
+    els.treatmentPicker.querySelectorAll('.tpick-opt').forEach(btn => {
+      const match = isPreset ? (btn.dataset.val === cur) : (btn.dataset.val === 'Other' && !els.treatmentOtherWrap.hidden);
+      btn.classList.toggle('active', match);
+      btn.setAttribute('aria-selected', match ? 'true' : 'false');
+    });
+  }
+
+  function openTreatmentPicker() {
+    highlightTreatmentOption();
+    els.treatmentPicker.hidden = false;
+    els.treatmentTrigger.classList.add('open');
+    document.body.classList.add('sheet-open');
+  }
+  function closeTreatmentPicker() {
+    els.treatmentPicker.hidden = true;
+    els.treatmentTrigger.classList.remove('open');
+    document.body.classList.remove('sheet-open');
+  }
+  function selectTreatmentOption(val) {
+    if (val === 'Other') {
+      els.fTreatment.value = '';
+      els.treatmentDisplay.textContent = 'Other';
+      els.treatmentDisplay.classList.remove('placeholder');
+      els.treatmentOtherWrap.hidden = false;
+      closeTreatmentPicker();
+      showClinicalSection(null);
+      setTimeout(() => els.treatmentOther.focus(), 60);
+    } else {
+      els.fTreatment.value = val;
+      els.treatmentDisplay.textContent = val;
+      els.treatmentDisplay.classList.remove('placeholder');
+      els.treatmentOtherWrap.hidden = true;
+      els.treatmentOther.value = '';
+      closeTreatmentPicker();
+      showClinicalSection(CLINICAL_TYPES.includes(val) ? val : null);
+    }
+  }
+
   function openModal(patient) {
     els.form.reset(); els.fName.classList.remove('invalid');
     if (patient) {
       els.modalTitle.textContent = 'تعديل بيانات المريض';
-      els.fId.value = patient.id; els.fName.value = patient.name || ''; els.fTreatment.value = patient.treatment || '';
+      els.fId.value = patient.id; els.fName.value = patient.name || ''; setTreatmentUI(patient.treatment || '');
       els.fSession.value = patient.session || ''; els.fPhone.value = patient.phone || '';
       els.fTotal.value = patient.total ?? ''; els.fPaid.value = patient.paid ?? ''; els.fSecond.value = patient.secondSession || '';
       els.fNotes.value = patient.notes || '';
-    } else { els.modalTitle.textContent = 'إضافة مريض جديد'; els.fId.value = ''; }
+      if (els.fAge) els.fAge.value = patient.age ?? '';
+      if (els.genderChips) setChipGroupUI(els.genderChips, els.fGender, patient.gender || '');
+      fillClinicalDetails(patient.clinicalDetails || null);
+    } else {
+      els.modalTitle.textContent = 'إضافة مريض جديد'; els.fId.value = ''; setTreatmentUI('');
+      if (els.fAge) els.fAge.value = '';
+      if (els.genderChips) setChipGroupUI(els.genderChips, els.fGender, '');
+      fillClinicalDetails(null);
+    }
     recalcRemaining(); els.overlay.hidden = false; setTimeout(() => els.fName.focus(), 50);
   }
-  function closeModal() { els.overlay.hidden = true; }
+  function closeModal() { els.overlay.hidden = true; closeTreatmentPicker(); closeGenericPicker(); }
+
+  /* ---------- اختيار رقم الهاتف من جهات اتصال الجهاز (Contact Picker API) ----------
+     ميزة اختيارية تماماً: تُستخدم فقط عند دعم المتصفح لها (Contact Picker API).
+     عند عدم الدعم: لا يحدث أي خطأ، ويبقى إدخال الرقم يدوياً يعمل بلا أي تأثر. ---------- */
+  async function pickContact() {
+    const supported = ('contacts' in navigator) && ('ContactsManager' in window) && navigator.contacts && typeof navigator.contacts.select === 'function';
+    if (!supported) { toast('اختيار جهات الاتصال غير مدعوم على هذا الجهاز'); return; }
+    try {
+      const results = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+      if (!results || !results.length) return; // ألغى المستخدم الاختيار
+      const c = results[0];
+      if (c.tel && c.tel.length) els.fPhone.value = String(c.tel[0]).trim();
+      if (!els.fName.value.trim() && c.name && c.name.length) els.fName.value = String(c.name[0]).trim();
+    } catch (e) {
+      // رفض الإذن أو إلغاء العملية — تجاهل بصمت، الإدخال اليدوي يبقى متاحاً
+    }
+  }
+
   function recalcRemaining() { els.fRemaining.value = fmt(toNum(els.fTotal.value) - toNum(els.fPaid.value)); }
   function handleSubmit(e) {
     e.preventDefault();
@@ -995,6 +1427,8 @@
     const data = {
       name, treatment: els.fTreatment.value.trim(), session: els.fSession.value.trim(), phone: els.fPhone.value.trim(),
       total: toNum(els.fTotal.value), paid: toNum(els.fPaid.value), secondSession: els.fSecond.value || '', notes: els.fNotes.value.trim(),
+      age: els.fAge ? els.fAge.value.trim() : '', gender: els.fGender ? els.fGender.value.trim() : '',
+      clinicalDetails: collectClinicalDetails(),
     };
     const id = els.fId.value;
     if (id) { const i = patients.findIndex(p => p.id === id); if (i !== -1) patients[i] = Object.assign({}, patients[i], data); }
@@ -1223,6 +1657,8 @@
     els.doctorCancel.addEventListener('click', closeDoctor);
 
     document.querySelectorAll('.dash-card').forEach(card => card.addEventListener('click', () => go(card.dataset.go)));
+    document.querySelectorAll('.home-tab-btn').forEach(btn => btn.addEventListener('click', () => go(btn.dataset.go)));
+    if (els.trialBanner) els.trialBanner.addEventListener('click', () => go('support'));
     els.backBtn.addEventListener('click', goBack);
 
     els.addBtn.addEventListener('click', () => openModal(null));
@@ -1231,7 +1667,46 @@
     els.cancelBtn.addEventListener('click', closeModal);
     els.form.addEventListener('submit', handleSubmit);
     els.fTotal.addEventListener('input', recalcRemaining);
+    if (els.pickContactBtn) els.pickContactBtn.addEventListener('click', pickContact);
     els.fPaid.addEventListener('input', recalcRemaining);
+
+    // حقل «نوع العمل» المخصّص
+    els.treatmentTrigger.addEventListener('click', openTreatmentPicker);
+    els.tpickBackdrop.addEventListener('click', closeTreatmentPicker);
+    els.tpickClose.addEventListener('click', closeTreatmentPicker);
+    els.treatmentPicker.querySelectorAll('.tpick-opt').forEach(btn => {
+      btn.addEventListener('click', () => selectTreatmentOption(btn.dataset.val));
+    });
+    els.treatmentOther.addEventListener('input', () => {
+      const v = els.treatmentOther.value;
+      els.fTreatment.value = v.trim();
+      els.treatmentDisplay.textContent = v.trim() || 'Other';
+    });
+
+    // اللوحة العامة (الحقول الفرعية الديناميكية)
+    if (els.genericPicker) {
+      els.gpickBackdrop.addEventListener('click', closeGenericPicker);
+      els.gpickClose.addEventListener('click', closeGenericPicker);
+    }
+    // الجنس
+    wireChipGroup(els.genderChips, els.fGender);
+    // Operative
+    wireOptionFieldWithOther(els.opClassTrigger, els.opClassDisplay, els.opClass, CLASS_OPTIONS, 'اختر Class', els.opClassOtherWrap, els.opClassOther);
+    wireOptionFieldWithOther(els.opMaterialTrigger, els.opMaterialDisplay, els.opMaterial, MATERIAL_OPTIONS, 'اختر مادة الحشو', els.opMaterialOtherWrap, els.opMaterialOther);
+    // Endo
+    wireOptionField(els.endoDiagnosisTrigger, els.endoDiagnosisDisplay, els.endoDiagnosis, DIAGNOSIS_OPTIONS, 'اختر التشخيص');
+    bindCanalsListEvents();
+    // Cleaning
+    wireOptionFieldWithOther(els.cleanProcTrigger, els.cleanProcDisplay, els.cleanProc, CLEANING_PROC_OPTIONS, 'اختر نوع الإجراء', els.cleanProcOtherWrap, els.cleanProcOther);
+    wireChipGroup(els.gumStatusChips, els.gumStatus);
+    // Orthodontics
+    wireOptionField(els.orthoVisitTrigger, els.orthoVisitDisplay, els.orthoVisit, ORTHO_VISIT_OPTIONS, 'اختر نوع الزيارة');
+    // Surgery
+    wireOptionFieldWithOther(els.surgProcTrigger, els.surgProcDisplay, els.surgProc, SURGERY_PROC_OPTIONS, 'اختر نوع الإجراء', els.surgProcOtherWrap, els.surgProcOther);
+    // Pediatric
+    wireOptionField(els.pedTreatTrigger, els.pedTreatDisplay, els.pedTreat, PEDIATRIC_TREAT_OPTIONS, 'اختر نوع العلاج');
+    wireChipGroup(els.pedBehaviorChips, els.pedBehavior);
+
     els.search.addEventListener('input', debounce(renderPatients, 120));
 
     // الجلسة
@@ -1317,6 +1792,14 @@
       var h = window.DPLicense.trialRemainingHours();
       els.trialText.textContent = 'الفترة التجريبية المجانية (3 أيام) — متبقٍ: ' + h + ' ساعة.';
       els.trialBanner.hidden = false;
+      // عداد دائري بصري إضافي للصفحة الرئيسية فقط — نفس القيمة h، بلا أي تغيير في المنطق
+      if (els.trialHours) els.trialHours.textContent = h;
+      if (els.trialRingFg) {
+        var pct = Math.max(0, Math.min(1, h / 72));
+        var C = 2 * Math.PI * 27;
+        els.trialRingFg.style.strokeDasharray = C.toFixed(2);
+        els.trialRingFg.style.strokeDashoffset = (C * (1 - pct)).toFixed(2);
+      }
     } else { els.trialBanner.hidden = true; }
   }
 
@@ -1352,6 +1835,15 @@
           const nw = reg.installing; if (!nw) return;
           nw.addEventListener('statechange', () => { if (nw.state === 'installed' && navigator.serviceWorker.controller) showUpdate(); });
         });
+        // إصلاح: فحص استباقي للتحديث بدل الاعتماد فقط على الفحص التلقائي
+        // البطيء للمتصفح (قد يتأخر حتى 24 ساعة) أو على ضغط المستخدم يدوياً
+        // على «التحقق من التحديثات». هذا يجعل سلوك التحديث يعمل تلقائياً
+        // بمجرد فتح التطبيق، دون تغيير أي شيء في منطق التفعيل أو البيانات.
+        if (navigator.serviceWorker.controller) reg.update().catch(() => {});
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible' && swReg) swReg.update().catch(() => {});
+        });
+        setInterval(() => { if (swReg) swReg.update().catch(() => {}); }, 60 * 60 * 1000);
       }).catch(() => {});
       navigator.serviceWorker.addEventListener('controllerchange', () => { if (_refreshing) return; _refreshing = true; window.location.reload(); });
     });

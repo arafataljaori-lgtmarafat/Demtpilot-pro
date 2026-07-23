@@ -1,7 +1,7 @@
 /* ============================================================
    DentPilot Pro — Service Worker (تحديث آمن مُتحكَّم به)
    ============================================================ */
-const CACHE = 'dentpilot-v2.3.0';
+const CACHE = 'dentpilot-v2.4.1';
 const ASSETS = [
   './', 'index.html', 'style.css', 'script.js', 'activation.js', 'manifest.json', 'version.json',
   'icon-192.png', 'icon-512.png', 'icon-512-maskable.png', 'apple-touch-icon.png', 'favicon.ico', 'favicon-32.png'

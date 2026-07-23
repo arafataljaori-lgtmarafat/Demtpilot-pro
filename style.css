@@ -604,9 +604,7 @@ img{ max-width:100%; }
   .p-notes{ font-size:12px; border:1px solid #d9e7e3; padding:9px 11px; border-radius:6px; white-space:pre-wrap; }
 }
 
-/* ---------- تجربة Pro المجانية + إضافات الإعدادات ---------- */
-.trial-banner{ display:flex; align-items:center; gap:8px; justify-content:center; background:linear-gradient(120deg,#fff6e5,#fdeccb); color:#8a5a12; border-bottom:1px solid #f0d9a8; padding:9px 16px; font-size:.85rem; font-weight:700; text-align:center; }
-.trial-banner .tb-ico{ font-size:1rem; }
+/* ---------- إضافات الإعدادات ---------- */
 .settings-extra{ border-top:1px dashed var(--line); margin-top:6px; padding-top:12px; }
 
 /* ============================================================
@@ -676,3 +674,606 @@ img{ max-width:100%; }
 .att-lb-close:hover{ background:rgba(255,255,255,.26); }
 .att-lb-stage{ flex:1; display:grid; place-items:center; padding:0 14px 18px; overflow:auto; }
 .att-lb-stage img{ max-width:100%; max-height:100%; object-fit:contain; border-radius:10px; box-shadow:0 12px 40px rgba(0,0,0,.5); }
+
+/* ============================================================
+   DentPilot — الصفحة الرئيسية (Mobile Home) — مطابقة للصورة المرجعية
+   ------------------------------------------------------------
+   • طبقة مظهر فقط. لا تغيير في أي منطق أو بيانات أو مفاتيح تخزين.
+   • كل قاعدة هنا إمّا:
+       (أ) داخل body[data-route="dashboard"] فتُفعَّل فقط أثناء عرض
+           الصفحة الرئيسية ولا تمسّ أي صفحة أخرى إطلاقاً، أو
+       (ب) عنصر جديد كلياً (#homeTabbar) لا وجود له في صفحات أخرى.
+   • لا تعديل عام على body / button / input / form / .modal.
+   ============================================================ */
+
+/* ---------- الهيدر: دمج خفيف داخل الصفحة، بدون شريط منفصل (الصفحة الرئيسية فقط) ---------- */
+body[data-route="dashboard"] .topbar{
+  position:static;
+  background:transparent;
+  box-shadow:none;
+  padding:14px 18px 2px;
+  color:var(--ink);
+}
+body[data-route="dashboard"] .topbar .brand-mark{
+  width:38px; height:38px; border-radius:12px;
+  background:linear-gradient(150deg, var(--teal-100), #d3ecea);
+  border:1px solid rgba(14,143,143,.14);
+  color:var(--teal-700);
+}
+body[data-route="dashboard"] .topbar .brand-text h1{ color:var(--navy-900); font-size:1.05rem; }
+body[data-route="dashboard"] .topbar .brand-text p{ color:var(--teal-700); opacity:1; font-size:.78rem; font-weight:600; }
+body[data-route="dashboard"] .topbar .brand-text p #docLabel{ color:var(--muted); font-weight:500; }
+body[data-route="dashboard"] .topbar .icon-btn{
+  width:40px; height:40px; border-radius:13px;
+  background:#fff; border:1px solid var(--line); color:var(--navy-800);
+  box-shadow:var(--shadow-sm);
+}
+body[data-route="dashboard"] .topbar .icon-btn:hover{ background:var(--teal-50); }
+body[data-route="dashboard"] .topbar .install-btn{ background:var(--teal-50); border-color:#c9e7e5; color:var(--teal-700); }
+body[data-route="dashboard"] .topbar .bell-count{ box-shadow:0 0 0 2px #fff; }
+
+/* ============================================================
+   الكرت الرئيسي العلوي (Hero) + كرسي الأسنان
+   ============================================================ */
+body[data-route="dashboard"] #view-dashboard{ padding-bottom:96px; }
+body[data-route="dashboard"] .wrap{ padding-top:16px; padding-inline:20px; }
+#view-dashboard .dash-hero{
+  position:relative; overflow:hidden;
+  max-width:100%; box-sizing:border-box;
+  display:flex; align-items:stretch;
+  height:166px;
+  border-radius:22px;
+  margin:0 0 18px;
+  background:linear-gradient(122deg, #071c36 0%, #0a2647 40%, #0c6e6f 118%);
+  box-shadow:0 10px 28px rgba(10,31,60,.22);
+}
+#view-dashboard .dash-hero-glow{ position:absolute; border-radius:50%; pointer-events:none; }
+#view-dashboard .dash-hero-glow.g1{ width:200px; height:200px; top:-60px; inset-inline-start:-40px; background:radial-gradient(circle, rgba(56,199,193,.34) 0%, transparent 70%); }
+#view-dashboard .dash-hero-glow.g2{ width:160px; height:160px; bottom:-70px; inset-inline-start:50px; background:radial-gradient(circle, rgba(255,255,255,.10) 0%, transparent 70%); }
+#view-dashboard .dash-hero-badge{
+  position:absolute; top:13px; inset-inline-end:14px;
+  font-family:'Cairo',sans-serif; font-weight:800; font-size:.7rem;
+  color:#8fe6df; background:rgba(255,255,255,.13);
+  border:1px solid rgba(255,255,255,.22);
+  padding:4px 12px; border-radius:999px; white-space:nowrap;
+}
+#view-dashboard .dash-hero-content{
+  position:relative; flex:1 1 56%; min-width:0;
+  display:flex; flex-direction:column; justify-content:flex-start;
+  padding:38px 16px 14px 8px; color:#fff;
+}
+#view-dashboard .dash-hero-title{
+  font-family:'Cairo',sans-serif; font-weight:800; font-size:1.16rem;
+  line-height:1.32; margin:0; overflow-wrap:anywhere;
+}
+#view-dashboard .dash-hero-meta{
+  margin:5px 0 0; font-size:.8rem; line-height:1.5;
+  color:rgba(255,255,255,.72); overflow-wrap:anywhere;
+}
+#view-dashboard .dash-hero-sub{
+  margin:6px 0 0; font-size:.72rem; line-height:1.45;
+  color:rgba(255,255,255,.5); overflow-wrap:anywhere;
+}
+
+/* ---------- شارة الفترة التجريبية داخل الكرت (لا تغيّر ارتفاع الكرت — موضّعة مطلقاً) ---------- */
+.sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; padding:0; margin:-1px; }
+#view-dashboard .hero-trial-badge{
+  position:absolute; inset-inline-end:14px; bottom:12px;
+  display:flex; align-items:center; gap:8px;
+  max-width:calc(100% - 20px); box-sizing:border-box;
+  border:1px solid rgba(255,255,255,.28);
+  background:linear-gradient(120deg, #17b8d6 0%, #1591d8 100%);
+  padding:7px 13px; border-radius:14px; cursor:pointer;
+  box-shadow:0 4px 16px rgba(21,145,216,.45), 0 0 0 1px rgba(255,255,255,.06) inset;
+  font-family:'Tajawal', sans-serif; text-align:start;
+  transition:transform .12s ease, box-shadow .16s ease;
+}
+#view-dashboard .hero-trial-badge:hover{ box-shadow:0 6px 20px rgba(21,145,216,.55), 0 0 0 1px rgba(255,255,255,.08) inset; }
+#view-dashboard .hero-trial-badge:active{ transform:scale(.97); }
+#view-dashboard .htb-ico{
+  flex:none; width:24px; height:24px; border-radius:8px;
+  display:grid; place-items:center; color:#fff;
+  background:rgba(255,255,255,.2);
+}
+#view-dashboard .htb-text{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+#view-dashboard .htb-text b{
+  font-size:.78rem; font-weight:800; color:#fff; line-height:1.25;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+#view-dashboard .htb-text small{ font-size:.65rem; color:rgba(255,255,255,.85); font-weight:600; }
+
+#view-dashboard .dash-hero-tooth{
+  position:relative; flex:0 0 36%; min-width:0;
+  display:flex; align-items:center; justify-content:center;
+  padding:14px 14px 14px 6px;
+}
+#view-dashboard .dash-hero-tooth svg{ width:100%; height:auto; max-width:130px; display:block; }
+
+/* ============================================================
+   بطاقات الإحصائيات الثلاث
+   ============================================================ */
+#view-dashboard .dash-stats-row{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+  margin-bottom:12px;
+}
+#view-dashboard .stat-card{
+  flex-direction:column; align-items:stretch; text-align:start;
+  min-width:0; max-width:100%; box-sizing:border-box; min-height:96px;
+  border-radius:16px; padding:10px 10px 9px;
+  border-color:#eef2f5; background:#f7fbfb;
+  box-shadow:0 1px 2px rgba(10,31,60,.03), 0 4px 14px rgba(10,31,60,.045);
+}
+#view-dashboard .stat-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:6px; }
+#view-dashboard .stat-card .dash-title{
+  font-size:.74rem; font-weight:700; color:var(--navy-800);
+  line-height:1.3; min-width:0; overflow-wrap:anywhere; flex:1;
+}
+#view-dashboard .stat-card .dash-emoji{
+  width:26px; height:26px; border-radius:9px; flex:none;
+  display:grid; place-items:center;
+  background:var(--red-soft); color:var(--late);
+}
+#view-dashboard .stat-card.today .dash-emoji{ background:var(--teal-100); color:var(--teal-700); }
+#view-dashboard .stat-card.patients .dash-emoji{ background:#e7edfb; color:#3355a8; }
+#view-dashboard .stat-card .dash-count{
+  display:block; font-family:'Cairo',sans-serif; font-weight:800;
+  font-size:1.5rem; color:var(--navy-900); margin-top:9px;
+  font-variant-numeric:tabular-nums; line-height:1;
+}
+#view-dashboard .stat-accent{
+  display:block; width:20px; height:3px; border-radius:3px;
+  background:var(--late); margin-top:8px;
+}
+#view-dashboard .stat-card.today .stat-accent{ background:var(--teal-600); }
+#view-dashboard .stat-card.patients .stat-accent{ background:#3355a8; }
+
+/* ============================================================
+   البطاقات الثانوية (النسخة الاحتياطية / التقارير)
+   ============================================================ */
+#view-dashboard .dash-sec-row{
+  display:grid; grid-template-columns:1fr 1fr; gap:9px;
+  margin-bottom:12px;
+}
+#view-dashboard .sec-card{
+  min-width:0; max-width:100%; box-sizing:border-box;
+  align-items:center; gap:9px;
+  padding:12px 12px; border-radius:16px;
+  border-color:#eef2f5; background:#f7fbfb;
+  box-shadow:0 1px 2px rgba(10,31,60,.03), 0 4px 14px rgba(10,31,60,.045);
+}
+#view-dashboard .sec-card .dash-emoji{
+  width:34px; height:34px; border-radius:11px; flex:none;
+  background:var(--teal-100); color:var(--teal-700);
+}
+#view-dashboard .sec-card .dash-info{ flex:1; min-width:0; gap:1px; }
+#view-dashboard .sec-card .dash-title{ font-size:.82rem; overflow-wrap:anywhere; }
+#view-dashboard .sec-card .dash-sub{ font-size:.68rem; }
+#view-dashboard .sec-chevron{ flex:none; color:var(--muted); display:flex; }
+
+/* ============================================================
+   الأزرار الرئيسية (الدعم والتفعيل / إضافة مريض)
+   ============================================================ */
+#view-dashboard .dash-main-row{
+  display:grid; grid-template-columns:1fr 1fr; gap:9px;
+  margin-bottom:20px;
+}
+#view-dashboard .main-btn{
+  min-width:0; max-width:100%; box-sizing:border-box;
+  align-items:center; gap:9px;
+  padding:14px 13px; border-radius:16px;
+  border-color:transparent; color:#fff;
+}
+#view-dashboard .main-btn .dash-info{ flex:1; min-width:0; gap:1px; }
+#view-dashboard .main-btn .dash-title{ color:#fff; font-size:.88rem; font-weight:800; overflow-wrap:anywhere; }
+#view-dashboard .main-btn .dash-sub{ color:rgba(255,255,255,.78); font-size:.7rem; }
+#view-dashboard .main-btn .dash-emoji{
+  width:32px; height:32px; border-radius:10px; flex:none;
+  background:rgba(255,255,255,.2); color:#fff; border:1px solid rgba(255,255,255,.24);
+}
+#view-dashboard .main-btn.support{
+  background:linear-gradient(135deg, var(--teal-500), var(--teal-700));
+  box-shadow:0 6px 16px rgba(14,143,143,.26);
+}
+#view-dashboard .main-btn.accent{
+  background:linear-gradient(135deg, #1a4a86, var(--navy-900));
+  box-shadow:0 6px 16px rgba(10,31,60,.28);
+}
+
+/* ---------- عنوان قسم مواعيد اليوم ---------- */
+#view-dashboard .section-head{ margin:2px 0 12px; }
+#view-dashboard .section-head h2{
+  display:flex; align-items:center; gap:8px; min-width:0;
+  font-size:1rem; font-weight:800; color:var(--navy-800);
+}
+#view-dashboard .section-head h2 svg{ color:var(--teal-600); flex:none; }
+
+/* ---------- بطاقات مواعيد اليوم (سلامة العرض) ---------- */
+#todayList{ min-width:0; }
+#todayList .appt-item{ min-width:0; max-width:100%; box-sizing:border-box; }
+#todayList .appt-main .nm, #todayList .appt-main .tr{
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+/* ---------- حالة «لا توجد مواعيد اليوم» ---------- */
+#todayList .empty-state{
+  position:relative;
+  max-width:100%; box-sizing:border-box;
+  padding:34px 20px 26px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, var(--teal-50) 0%, transparent 62%),
+    #fff;
+  border:1px solid var(--line);
+  border-radius:20px;
+}
+#todayList .empty-state::before{
+  content:"";
+  display:block; width:58px; height:58px; margin:0 auto 14px;
+  border-radius:16px;
+  background:linear-gradient(150deg, var(--teal-100), #d5ecea);
+  -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><rect x='3.5' y='5' width='17' height='15.5' rx='2.5'/><path d='M15.5 3v4M8.5 3v4M3.5 9.5h17'/><circle cx='8' cy='13.3' r='.6' fill='black' stroke='none'/><circle cx='12' cy='13.3' r='.6' fill='black' stroke='none'/><circle cx='16' cy='13.3' r='.6' fill='black' stroke='none'/><circle cx='8' cy='16.6' r='.6' fill='black' stroke='none'/><circle cx='12' cy='16.6' r='.6' fill='black' stroke='none'/></svg>") center/60% no-repeat;
+          mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'><rect x='3.5' y='5' width='17' height='15.5' rx='2.5'/><path d='M15.5 3v4M8.5 3v4M3.5 9.5h17'/><circle cx='8' cy='13.3' r='.6' fill='black' stroke='none'/><circle cx='12' cy='13.3' r='.6' fill='black' stroke='none'/><circle cx='16' cy='13.3' r='.6' fill='black' stroke='none'/><circle cx='8' cy='16.6' r='.6' fill='black' stroke='none'/><circle cx='12' cy='16.6' r='.6' fill='black' stroke='none'/></svg>") center/60% no-repeat;
+  background-color:var(--teal-700);
+}
+#todayList .empty-state::after{
+  content:"";
+  position:absolute; top:56px; inset-inline:0; margin:0 auto;
+  width:22px; height:22px; border-radius:50%;
+  background:#fff; border:2px solid var(--teal-500);
+}
+#todayList .empty-state p{ position:relative; font-size:.98rem; font-weight:700; margin:0 0 4px; color:var(--navy-800); }
+#todayList .empty-state span{ position:relative; font-size:.83rem; color:var(--muted); }
+
+/* ============================================================
+   شريط التنقّل السفلي (عنصر جديد كلياً — لا وجود له إلا هنا)
+   ============================================================ */
+#homeTabbar{
+  display:none;
+  position:fixed; bottom:0; inset-inline:0; z-index:40;
+  padding:8px 14px calc(8px + env(safe-area-inset-bottom));
+  background:#fff; border-top:1px solid var(--line);
+  box-shadow:0 -6px 20px rgba(10,31,60,.07);
+  max-width:100%; box-sizing:border-box;
+}
+body[data-route="dashboard"] #homeTabbar{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:6px;
+}
+.home-tab-btn{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px; min-width:0; padding:8px 4px;
+  border:0; background:none; cursor:pointer; font:inherit;
+  color:var(--muted); border-radius:14px;
+  transition:background .16s ease, color .16s ease;
+}
+.home-tab-btn span{ font-size:.7rem; font-weight:700; }
+.home-tab-btn.active{
+  color:var(--navy-900); background:#fff;
+  box-shadow:0 4px 14px rgba(10,31,60,.12), 0 1px 2px rgba(10,31,60,.05);
+  border:1px solid var(--line);
+}
+
+/* ============================================================
+   سلامة العرض على شاشات الجوال (360–430px) — بدون تمرير أفقي
+   ============================================================ */
+@media (max-width:430px){
+  #view-dashboard .dash-hero{ height:160px; }
+  #view-dashboard .dash-hero-title{ font-size:1.08rem; }
+  #view-dashboard .dash-hero-meta{ font-size:.78rem; }
+  #view-dashboard .dash-hero-content{ padding:34px 14px 12px 6px; }
+  #view-dashboard .stat-card .dash-count{ font-size:1.3rem; }
+}
+@media (max-width:390px){
+  #view-dashboard .dash-hero{ height:154px; }
+  #view-dashboard .dash-hero-content{ flex:1 1 58%; padding:30px 12px 10px 6px; }
+  #view-dashboard .dash-hero-tooth{ flex:0 0 36%; padding:10px 10px 10px 4px; }
+  #view-dashboard .dash-hero-tooth svg{ max-width:108px; }
+  #view-dashboard .dash-hero-title{ font-size:1rem; }
+  #view-dashboard .dash-hero-badge{ font-size:.65rem; padding:3px 10px; }
+  #view-dashboard .hero-trial-badge{ inset-inline-end:10px; bottom:9px; padding:6px 10px; gap:6px; }
+  #view-dashboard .htb-ico{ width:21px; height:21px; }
+  #view-dashboard .htb-text b{ font-size:.72rem; }
+  #view-dashboard .htb-text small{ font-size:.6rem; }
+  #view-dashboard .dash-stats-row{ gap:7px; }
+  #view-dashboard .stat-card{ padding:9px 8px 8px; border-radius:14px; min-height:96px; }
+  #view-dashboard .stat-card .dash-title{ font-size:.68rem; }
+  #view-dashboard .stat-card .dash-count{ font-size:1.16rem; margin-top:7px; }
+  #view-dashboard .stat-card .dash-emoji{ width:23px; height:23px; }
+  #view-dashboard .dash-sec-row,
+  #view-dashboard .dash-main-row{ gap:7px; }
+}
+@media (max-width:365px){
+  #view-dashboard .dash-hero{ height:152px; }
+  #view-dashboard .dash-hero-content{ flex-basis:60%; padding-top:28px; }
+  #view-dashboard .dash-hero-tooth{ flex-basis:34%; }
+  #view-dashboard .dash-hero-tooth svg{ max-width:96px; }
+  #view-dashboard .dash-hero-title{ font-size:.94rem; }
+  #view-dashboard .dash-hero-meta{ font-size:.72rem; }
+  #view-dashboard .hero-trial-badge{ inset-inline-end:8px; bottom:8px; }
+  #view-dashboard .htb-text small{ display:none; }
+  #view-dashboard .main-btn .dash-title{ font-size:.82rem; }
+  #view-dashboard .main-btn{ padding:12px 10px; gap:7px; }
+}
+
+/* منع أي تمدد أفقي من الكرت أو الشبكات الجديدة */
+#view-dashboard, #view-dashboard *, #homeTabbar, #homeTabbar *{ min-width:0; }
+#view-dashboard{ max-width:100%; box-sizing:border-box; }
+
+/* ============================================================
+   نافذة إضافة/تعديل مريض — حقل «نوع العمل» (Treatment Picker)
+   ------------------------------------------------------------
+   طبقة مستقلة كلياً: كل الأصناف هنا (.tpick-*) خاصة بهذا الحقل
+   فقط، ولا تتقاطع مع أي عنصر آخر في التطبيق.
+   ============================================================ */
+
+/* ---------- زر التشغيل (يحل محل input النصي) ---------- */
+.tpick-trigger{
+  width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px;
+  font-family:inherit; font-size:.95rem; color:var(--ink); text-align:start;
+  padding:12px 13px; border:1px solid var(--line); border-radius:12px;
+  background:var(--paper); cursor:pointer; outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.tpick-trigger:hover{ background:#fff; border-color:#c9dbe2; }
+.tpick-trigger:focus-visible,
+.tpick-trigger.open{ border-color:var(--teal-500); box-shadow:0 0 0 3px rgba(22,168,166,.16); background:#fff; }
+.tpick-display{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; color:var(--navy-800); }
+.tpick-display.placeholder{ color:#94a3ae; font-weight:400; }
+.tpick-chev{ flex:none; color:var(--teal-600); transition:transform .2s ease; }
+.tpick-trigger.open .tpick-chev{ transform:rotate(180deg); }
+
+/* ---------- حقل «اكتب نوع العمل» عند اختيار Other ---------- */
+.tpick-other-field{ margin-top:8px; animation:tpickIn .16s ease; }
+.tpick-other-field input{
+  width:100%; font-family:inherit; font-size:.95rem; color:var(--ink);
+  padding:12px 13px; border:1px solid var(--teal-500); border-radius:12px;
+  background:#fff; outline:none; box-shadow:0 0 0 3px rgba(22,168,166,.12);
+}
+@keyframes tpickIn{ from{ opacity:0; transform:translateY(-4px);} to{ opacity:1; transform:none; } }
+
+/* ============================================================
+   لوحة الاختيار (Bottom Sheet)
+   ============================================================ */
+.tpick-sheet{ position:fixed; inset:0; z-index:75; }
+.tpick-backdrop{
+  position:absolute; inset:0; border:0; padding:0; margin:0; cursor:pointer;
+  background:rgba(10,31,60,.5); backdrop-filter:blur(3px);
+  animation:fade .15s ease;
+}
+.tpick-panel{
+  position:absolute; inset-inline:0; bottom:0;
+  max-width:580px; margin:0 auto;
+  background:#fff; border-radius:20px 20px 0 0;
+  box-shadow:0 -12px 40px rgba(10,31,60,.22);
+  max-height:min(64vh, 460px); display:flex; flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom);
+  animation:tpickUp .2s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes tpickUp{ from{ transform:translateY(100%);} to{ transform:translateY(0);} }
+.tpick-grip{ width:38px; height:4px; border-radius:99px; background:var(--line); margin:10px auto 2px; flex:none; }
+.tpick-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:10px 18px 12px; border-bottom:1px solid var(--line); flex:none;
+}
+.tpick-head h3{ margin:0; font-family:'Cairo',sans-serif; font-size:1rem; font-weight:800; color:var(--navy-800); }
+.tpick-head .modal-close{ background:var(--paper); color:var(--navy-700); }
+.tpick-head .modal-close:hover{ background:var(--line); }
+
+/* ---------- قائمة الخيارات (صفوف/بطاقات أنيقة) ---------- */
+.tpick-list{
+  overflow-y:auto; padding:10px 12px calc(14px + env(safe-area-inset-bottom));
+  display:flex; flex-direction:column; gap:6px;
+}
+.tpick-opt{
+  position:relative; width:100%; text-align:start;
+  font-family:inherit; font-size:.92rem; font-weight:600; color:var(--navy-800);
+  background:var(--paper); border:1px solid transparent; border-radius:13px;
+  padding:12px 40px 12px 14px; min-height:46px; cursor:pointer;
+  transition:background .14s ease, border-color .14s ease, color .14s ease, transform .1s ease;
+}
+.tpick-opt:hover{ background:var(--teal-50); }
+.tpick-opt:active{ transform:scale(.985); }
+.tpick-opt.active{
+  background:var(--teal-50); border-color:var(--teal-500); color:var(--teal-700); font-weight:800;
+}
+.tpick-opt.active::after{
+  content:""; position:absolute; top:50%; inset-inline-end:14px; width:18px; height:18px;
+  transform:translateY(-50%);
+  background-color:var(--teal-600);
+  -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12.5 9.5 17 19 7'/></svg>") center/contain no-repeat;
+          mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12.5 9.5 17 19 7'/></svg>") center/contain no-repeat;
+}
+
+/* ---------- سلامة الجوال (360–430px)، بلا تمرير أفقي وبلا قصّ ---------- */
+@media (max-width:420px){
+  .tpick-panel{ max-height:min(60vh, 420px); }
+  .tpick-head{ padding:9px 15px 10px; }
+  .tpick-list{ padding:8px 10px calc(12px + env(safe-area-inset-bottom)); }
+  .tpick-opt{ font-size:.88rem; padding:11px 36px 11px 12px; }
+}
+
+/* ============================================================
+   نموذج إضافة/تعديل مريض — الحقول الديموغرافية والحقول
+   الديناميكية حسب نوع الحالة (Clinical Details)
+   ------------------------------------------------------------
+   طبقة إضافية بالكامل: لا تعديل على body/button/input/form/.modal
+   العامة. كل شيء هنا مُقيَّد بأصناف جديدة خاصة بهذا النموذج فقط.
+   لوحة الاختيار العامة (#genericPicker) تعيد استخدام أصناف
+   .tpick-* الموجودة فعلياً (نفس مظهر لوحة نوع العمل) دون تكرار.
+   ============================================================ */
+
+/* ---------- صف مزدوج مضغوط (يبقى عمودين حتى على أضيق الشاشات) ---------- */
+.field-row-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+.field-row-2 .field{ margin-bottom:0; min-width:0; }
+.field-row-2 .field input{ min-width:0; }
+
+/* ---------- مجموعات الشرائح (Chips): الجنس / حالة اللثة / سلوك الطفل ---------- */
+.chip-group{ display:flex; gap:8px; flex-wrap:wrap; }
+.chip-btn{
+  padding:9px 15px; border-radius:999px; border:1px solid var(--line);
+  background:var(--paper); font-family:inherit; font-size:.85rem; font-weight:700;
+  color:var(--navy-800); cursor:pointer; min-height:38px;
+  transition:background .14s ease, border-color .14s ease, color .14s ease, transform .1s ease;
+}
+.chip-btn:hover{ background:#fff; border-color:#c9dbe2; }
+.chip-btn:active{ transform:scale(.96); }
+.chip-btn.active{ background:var(--teal-600); border-color:var(--teal-600); color:#fff; }
+
+/* ---------- قسم الحقول الديناميكية حسب نوع الحالة ---------- */
+#clinicalSection{ margin-top:2px; }
+.clin-block{
+  background:var(--paper); border:1px solid var(--line); border-radius:16px;
+  padding:14px 14px 4px; margin:4px 0 16px;
+}
+.clin-block .form-section.clin-title{
+  margin-top:0; padding-bottom:8px; font-size:.78rem; color:var(--teal-700);
+}
+.clin-block .field-row-2{ gap:10px; }
+
+/* ---------- قسم القنوات (Endo) ---------- */
+.clin-sub{ margin-top:6px; padding-top:12px; border-top:1px dashed var(--line); }
+.clin-sub-head{
+  font-family:'Cairo',sans-serif; font-weight:800; font-size:.88rem;
+  color:var(--navy-800); margin-bottom:10px;
+}
+.clin-empty{ font-size:.82rem; color:#8a99a5; margin:0 0 10px; }
+
+.canal-card{
+  background:#fff; border:1px solid var(--line); border-radius:14px;
+  padding:12px; margin-bottom:10px;
+}
+.canal-card .field-row-2{ gap:8px; margin-bottom:10px; }
+.canal-card .field{ margin-bottom:10px; }
+.canal-card .field:last-child, .canal-card .field-row-2:last-child{ margin-bottom:0; }
+.canal-card-head{
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+}
+.canal-card-title{
+  font-family:'Cairo',sans-serif; font-weight:800; font-size:.85rem; color:var(--teal-700);
+  background:var(--teal-50); padding:3px 10px; border-radius:999px;
+}
+.canal-remove{
+  width:28px; height:28px; border-radius:9px; flex:none;
+  border:1px solid var(--line); background:#fff; color:var(--red);
+  display:grid; place-items:center; cursor:pointer; padding:0;
+  transition:background .14s ease, border-color .14s ease;
+}
+.canal-remove:hover{ background:#fdecea; border-color:#f3c6c1; }
+.canal-remove:active{ transform:scale(.92); }
+
+.btn-add-canal{
+  width:100%; display:flex; align-items:center; justify-content:center; gap:7px;
+  padding:11px; margin-top:2px; margin-bottom:10px;
+  border:1.5px dashed var(--teal-500); border-radius:12px;
+  background:var(--teal-50); color:var(--teal-700);
+  font-family:inherit; font-size:.87rem; font-weight:800; cursor:pointer;
+  transition:background .14s ease, border-color .14s ease;
+}
+.btn-add-canal:hover{ background:#e3f4f3; }
+.btn-add-canal:active{ transform:scale(.985); }
+
+/* ---------- سلامة الجوال (360–430px) ---------- */
+@media (max-width:420px){
+  .field-row-2{ gap:8px; }
+  .chip-btn{ padding:8px 12px; font-size:.82rem; }
+  .clin-block{ padding:12px 12px 2px; }
+  .canal-card{ padding:10px; }
+}
+@media (max-width:365px){
+  .chip-group{ gap:6px; }
+  .chip-btn{ padding:7px 10px; font-size:.78rem; }
+}
+
+/* ============================================================
+   تعديلات إضافية: زر اختيار جهة الاتصال، بطاقة «المتبقي» المدمجة،
+   وسجل الدفعات كجدول حي — طبقة مظهر/عرض جديدة فقط، بلا أي تغيير
+   على منطق الحفظ أو مفاتيح LocalStorage.
+   ============================================================ */
+
+/* ---------- زر اختيار جهة الاتصال بجانب حقل الهاتف ---------- */
+.phone-input-row{ display:flex; align-items:stretch; gap:7px; }
+.phone-input-row input{ flex:1; min-width:0; }
+.contact-pick-btn{
+  flex:none; width:44px;
+  display:grid; place-items:center;
+  border:1px solid var(--line-2, #d7e2ec); border-radius:12px;
+  background:var(--teal-50, #f0f9f8); color:var(--teal-700, #0a7375);
+  cursor:pointer; padding:0;
+  transition:background .16s ease, border-color .16s ease, transform .1s ease;
+}
+.contact-pick-btn:hover{ background:var(--teal-100, #e1f3f2); border-color:#bfe0dd; }
+.contact-pick-btn:active{ transform:scale(.93); }
+
+/* ---------- بطاقة «المتبقي» المدمجة (بديل خانة الشبكة الثلاثية) ---------- */
+.remaining-card{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background:linear-gradient(135deg, var(--teal-50, #f0f9f8), #e6f4f3);
+  border:1px solid #cfe9e7; border-radius:14px;
+  padding:12px 16px; margin:0 0 14px;
+}
+.remaining-label{ font-size:.82rem; font-weight:700; color:var(--navy-800, #0d3054); }
+.remaining-value{
+  border:0; background:none; padding:0; margin:0; text-align:end;
+  font-family:'Cairo', sans-serif; font-weight:800; font-size:1.15rem;
+  color:var(--teal-700, #0a7375); font-variant-numeric:tabular-nums;
+  width:auto; max-width:50%;
+}
+
+/* ============================================================
+   سجل الدفعات — جدول حي (بطاقات صفوف مضغوطة، Mobile First)
+   ============================================================ */
+.pay-summary{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+  margin-bottom:12px;
+}
+.pay-sum-item{
+  display:flex; flex-direction:column; gap:2px; align-items:center; text-align:center;
+  background:var(--paper, #fbfdfd); border:1px solid var(--line, #dce7ec);
+  border-radius:12px; padding:9px 6px;
+}
+.pay-sum-item span{ font-size:.68rem; color:var(--muted, #5d7389); }
+.pay-sum-item b{
+  font-family:'Cairo', sans-serif; font-weight:800; font-size:.92rem;
+  color:var(--navy-800, #0d3054); font-variant-numeric:tabular-nums;
+}
+.pay-sum-item b.ok{ color:var(--green, #1e8a5a); }
+.pay-sum-item b.due{ color:var(--red, #c0392b); }
+
+.pay-table{ display:flex; flex-direction:column; gap:8px; }
+.pay-trow{
+  background:#fff; border:1px solid var(--line, #dce7ec); border-radius:13px;
+  padding:10px 12px; box-shadow:var(--shadow-sm, 0 1px 2px rgba(10,31,60,.04));
+  max-width:100%; box-sizing:border-box; min-width:0;
+}
+.pay-trow-top{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  flex-wrap:wrap; margin-bottom:5px;
+}
+.pay-date-badge{ font-size:.76rem; color:var(--muted, #5d7389); min-width:0; }
+.pay-sess-badge{
+  font-size:.68rem; font-weight:800; color:var(--teal-700, #0a7375);
+  background:var(--teal-50, #f0f9f8); border-radius:999px; padding:2px 9px;
+  flex:none; white-space:nowrap;
+}
+.pay-trow-treat{
+  font-size:.82rem; font-weight:700; color:var(--navy-800, #0d3054);
+  margin-bottom:6px; overflow-wrap:anywhere;
+}
+.pay-trow-bottom{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  flex-wrap:wrap; font-size:.78rem; padding-top:6px; border-top:1px dashed var(--line, #dce7ec);
+}
+.pay-paid{ color:var(--muted, #5d7389); }
+.pay-paid b{ color:var(--green, #1e8a5a); font-variant-numeric:tabular-nums; }
+.pay-remain{ color:var(--muted, #5d7389); }
+.pay-remain b{ color:var(--navy-800, #0d3054); font-variant-numeric:tabular-nums; }
+.pay-trow-notes{
+  margin-top:6px; font-size:.74rem; color:var(--muted, #5d7389);
+  overflow-wrap:anywhere;
+}
+
+@media (max-width:365px){
+  .pay-summary{ gap:6px; }
+  .pay-sum-item{ padding:8px 4px; }
+  .pay-sum-item b{ font-size:.82rem; }
+  .remaining-card{ padding:11px 13px; }
+  .contact-pick-btn{ width:40px; }
+}
