@@ -343,9 +343,46 @@ h1,h2{ font-family:'Cairo','Tajawal',sans-serif; margin:0; }
 .sbox.money{ border-top-color:var(--red); } .sbox.money .sv{ color:var(--red); }
 
 /* ---------- النسخة الاحتياطية ---------- */
-.backup-card{ background:#fff; border:1px solid var(--line); border-radius:18px; padding:30px 24px; box-shadow:var(--shadow-sm); text-align:center; }
+.backup-card{ background:#fff; border:1px solid var(--line); border-radius:18px; padding:24px 22px; box-shadow:var(--shadow-sm); text-align:center; margin-bottom:14px; }
 .backup-card p{ color:var(--muted); margin:0 auto; max-width:540px; }
 .backup-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px; }
+.backup-card-head{ display:flex; align-items:center; justify-content:center; gap:9px; margin-bottom:10px; }
+.backup-card-ico{
+  width:34px; height:34px; border-radius:11px; flex:none;
+  display:grid; place-items:center;
+  background:var(--teal-100); color:var(--teal-700);
+}
+.backup-card-head h3{ font-family:'Cairo',sans-serif; font-weight:800; font-size:.98rem; color:var(--navy-800); margin:0; }
+
+/* بطاقة Google Drive — نفس الأسلوب، بلمسة أزرق/تركواز مميّزة قليلاً */
+.gdrive-card{
+  background:linear-gradient(180deg, #fbfeff 0%, #ffffff 55%);
+  border-color:#d9ecf5;
+}
+.gdrive-ico{ background:#e3f1fb; color:#1f6fa8; }
+.gdrive-note{
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  margin:10px auto 0; max-width:460px;
+  font-size:.78rem; color:#8a7130;
+  background:#fbf5e2; border:1px solid #f0e2b8;
+  border-radius:10px; padding:7px 12px;
+}
+.btn-gdrive{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  border:1px solid transparent; border-radius:12px;
+  padding:11px 18px; font-family:'Cairo','Tajawal',sans-serif;
+  font-size:.9rem; font-weight:700; cursor:pointer; min-height:44px;
+  color:#fff; background:linear-gradient(135deg, #1f8fc9, #1a6fb8);
+  box-shadow:0 4px 14px rgba(31,143,201,.28);
+  transition:filter .16s ease, transform .12s ease;
+}
+.btn-gdrive:hover{ filter:brightness(1.06); }
+.btn-gdrive:active{ transform:translateY(1px) scale(.99); }
+
+.backup-bottom-note{
+  text-align:center; color:var(--muted-2, var(--muted));
+  font-size:.78rem; margin:6px 0 0;
+}
 
 /* ---------- التوست ---------- */
 .toast{ position:fixed; inset-inline:0; bottom:calc(24px + env(safe-area-inset-bottom)); margin:auto; width:max-content; max-width:90%; background:var(--navy-800); color:#fff; padding:12px 22px; border-radius:12px; box-shadow:var(--shadow-md); z-index:200; font-weight:700; font-size:.9rem; animation:toastIn .2s ease; }

@@ -48,7 +48,7 @@
   };
 
   const $ = (id) => document.getElementById(id);
-  const APP_VERSION = '2.4.1';
+  const APP_VERSION = '2.4.2';
   const els = {
     splash: $('splash'), backBtn: $('backBtn'), installBtn: $('installBtn'), docLabel: $('docLabel'),
     trialBanner: $('trialBanner'), trialText: $('trialText'),
@@ -73,7 +73,7 @@
     // إحصائيات / تقارير
     statsContent: $('statsContent'), reportsContent: $('reportsContent'),
     // نسخة احتياطية
-    exportBtn: $('exportBtn'), importBtn: $('importBtn'), importFile: $('importFile'),
+    exportBtn: $('exportBtn'), importBtn: $('importBtn'), importFile: $('importFile'), gdriveBackupBtn: $('gdriveBackupBtn'),
     // نافذة المريض
     overlay: $('modalOverlay'), modalTitle: $('modalTitle'), modalClose: $('modalClose'),
     cancelBtn: $('cancelBtn'), form: $('patientForm'),
@@ -1645,6 +1645,59 @@
     reader.readAsText(file);
   }
 
+  /* ---------- الاحتفاظ في Google Drive (مرحلة أولى: مشاركة/تنزيل يدوي فقط) ----------
+     لا يوجد Google API ولا OAuth ولا خادم. نفس بنية بيانات exportBackup() تماماً
+     لضمان توافق الاستيراد، فقط باسم ملف أوضح واستخدام اختياري لـ Web Share API. ---------- */
+  function gdriveBackupFile() {
+    const data = { app: 'DentPilot', version: '2.0', exportedAt: new Date().toISOString(), settings, patients, attachments };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const today = new Date().toISOString().slice(0, 10);
+    const rawName = (settings.doctorName || '').trim();
+    const safeName = rawName.replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, '-').slice(0, 60);
+    const filename = 'DentPilot-Backup-' + today + (safeName ? '-' + safeName : '') + '.dentbackup';
+    return { blob, filename };
+  }
+  async function saveBackupToGoogleDrive() {
+    let blob, filename;
+    try {
+      ({ blob, filename } = gdriveBackupFile());
+    } catch (e) {
+      toast('تعذّر إنشاء النسخة الاحتياطية. حاول مرة أخرى.');
+      return;
+    }
+    let canShareFiles = false;
+    let file = null;
+    try {
+      file = new File([blob], filename, { type: 'application/json' });
+      canShareFiles = !!(navigator.canShare && navigator.share && navigator.canShare({ files: [file] }));
+    } catch (e) { canShareFiles = false; }
+
+    if (canShareFiles) {
+      try {
+        await navigator.share({ files: [file], title: 'نسخة DentPilot الاحتياطية' });
+        toast('تم تجهيز النسخة الاحتياطية. اختر Google Drive لحفظها.');
+      } catch (err) {
+        if (err && (err.name === 'AbortError' || /abort/i.test(String(err && err.message)))) {
+          toast('لم يتم حفظ النسخة. يمكنك المحاولة مرة أخرى.');
+        } else {
+          toast('تعذّر إنشاء النسخة الاحتياطية. حاول مرة أخرى.');
+        }
+      }
+      return;
+    }
+    // بديل: لا يوجد دعم لمشاركة الملفات — تنزيل عادي ثم توجيه المستخدم يدوياً
+    try {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      toast('تم تنزيل ملف النسخة. احفظه في Google Drive حتى تستطيع استعادته لاحقاً.');
+    } catch (e) {
+      toast('تعذّر إنشاء النسخة الاحتياطية. حاول مرة أخرى.');
+    }
+  }
+
   /* ============================================================
      ربط الأحداث
      ============================================================ */
@@ -1755,6 +1808,7 @@
     els.exportBtn.addEventListener('click', exportBackup);
     els.importBtn.addEventListener('click', () => els.importFile.click());
     els.importFile.addEventListener('change', (e) => { const f = e.target.files[0]; if (f) importBackup(f); e.target.value = ''; });
+    if (els.gdriveBackupBtn) els.gdriveBackupBtn.addEventListener('click', saveBackupToGoogleDrive);
 
     // التنبيه
     els.bellBtn.addEventListener('click', () => {

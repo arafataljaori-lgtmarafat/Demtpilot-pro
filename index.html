@@ -356,15 +356,51 @@
 
     <!-- ============ النسخة الاحتياطية ============ -->
     <section class="view" id="view-backup" data-view="backup" hidden>
-      <div class="page-head"><h2>💾 النسخة الاحتياطية</h2></div>
+      <div class="page-head">
+        <h2>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M8 21v-7h8v7M8 3v4h6"/></svg>
+          النسخة الاحتياطية
+        </h2>
+      </div>
+
+      <!-- 1) الاحتفاظ على الجهاز (الوظيفة الحالية دون أي تغيير) -->
       <div class="backup-card">
+        <div class="backup-card-head">
+          <span class="backup-card-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 4v4h8V4M8 20v-6h8v6"/></svg>
+          </span>
+          <h3>الاحتفاظ على الجهاز</h3>
+        </div>
         <p>احفظ نسخة من كل بياناتك في ملف، أو استعد بياناتك من ملف سابق. تبقى البيانات محلية على جهازك.</p>
         <div class="backup-actions">
           <button id="exportBtn" class="btn btn-primary">⬇ تصدير نسخة احتياطية</button>
           <button id="importBtn" class="btn btn-ghost">⬆ استيراد نسخة</button>
-          <input type="file" id="importFile" accept="application/json" hidden />
+          <input type="file" id="importFile" accept="application/json,.dentbackup,.json" hidden />
         </div>
       </div>
+
+      <!-- 2) الاحتفاظ في Google Drive (مرحلة أولى — مشاركة/تنزيل يدوي فقط، بلا API أو تسجيل دخول) -->
+      <div class="backup-card gdrive-card">
+        <div class="backup-card-head">
+          <span class="backup-card-ico gdrive-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17.5a4.5 4.5 0 0 1-.5-8.97 5.5 5.5 0 0 1 10.6-1.8A4.5 4.5 0 0 1 17 17.5z"/><path d="M12 11v7M9.2 15.2 12 18l2.8-2.8"/></svg>
+          </span>
+          <h3>الاحتفاظ في Google Drive</h3>
+        </div>
+        <p>أنشئ نسخة احتياطية ثم احفظها في Google Drive حتى تستطيع استعادتها عند تغيير الهاتف أو فقدانه.</p>
+        <div class="gdrive-note">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+          هذه نسخة يدوية، وليست مزامنة تلقائية.
+        </div>
+        <div class="backup-actions">
+          <button id="gdriveBackupBtn" class="btn btn-gdrive">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17.5a4.5 4.5 0 0 1-.5-8.97 5.5 5.5 0 0 1 10.6-1.8A4.5 4.5 0 0 1 17 17.5z"/><path d="M12 11v7M9.2 15.2 12 18l2.8-2.8"/></svg>
+            حفظ نسخة في Google Drive
+          </button>
+        </div>
+      </div>
+
+      <p class="backup-bottom-note">جميع بياناتك محفوظة محلياً على هذا الجهاز.</p>
     </section>
 
     <!-- ============ الدعم والتفعيل ============ -->
