@@ -85,6 +85,9 @@
   <!-- الشريط العلوي -->
   <header class="topbar" id="topbar">
     <div class="brand">
+      <button id="menuBtn" class="icon-btn menu-btn" title="القائمة" aria-label="فتح القائمة" aria-controls="sideDrawer" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h11M4 17h16"/></svg>
+      </button>
       <button id="backBtn" class="icon-btn back-btn" title="رجوع" aria-label="رجوع" hidden>
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
       </button>
@@ -123,8 +126,9 @@
     <!-- ============ لوحة التحكم ============ -->
     <section class="view" id="view-dashboard" data-view="dashboard">
 
-      <!-- الكرت الرئيسي العلوي -->
+      <!-- الكرت الرئيسي العلوي (Hero) — إعادة بناء بصرية، نفس العناصر والمنطق -->
       <div class="dash-hero">
+        <span class="dash-hero-grid" aria-hidden="true"></span>
         <span class="dash-hero-glow g1" aria-hidden="true"></span>
         <span class="dash-hero-glow g2" aria-hidden="true"></span>
         <span class="dash-hero-badge">DentPilot</span>
@@ -144,103 +148,129 @@
           </button>
         </div>
         <div class="dash-hero-tooth" aria-hidden="true">
-          <svg viewBox="0 0 200 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="glowOuter" cx=".5" cy=".46" r=".62">
-              <stop offset="0" stop-color="#5fe0e8" stop-opacity=".5"/>
-              <stop offset=".55" stop-color="#38b8d8" stop-opacity=".18"/>
-              <stop offset="1" stop-color="#38b8d8" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="glowInner" cx=".5" cy=".42" r=".38">
-              <stop offset="0" stop-color="#bff7ff" stop-opacity=".65"/>
-              <stop offset="1" stop-color="#bff7ff" stop-opacity="0"/>
-            </radialGradient>
-            <linearGradient id="enamel" x1=".15" y1="0" x2=".8" y2="1">
-              <stop offset="0"   stop-color="#ffffff"/>
-              <stop offset=".32" stop-color="#eefbff"/>
-              <stop offset=".62" stop-color="#bfe9f5"/>
-              <stop offset="1"   stop-color="#6bb9d6"/>
-            </linearGradient>
-            <linearGradient id="enamelShade" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
-              <stop offset="1" stop-color="#2f6f93" stop-opacity=".55"/>
-            </linearGradient>
-            <linearGradient id="rootShade" x1=".5" y1="0" x2=".5" y2="1">
-              <stop offset="0" stop-color="#dff3fa"/>
-              <stop offset="1" stop-color="#7fb9d4"/>
-            </linearGradient>
-            <filter id="blurSm" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.4"/></filter>
-            <filter id="blurLg" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="9"/></filter>
-          </defs>
+          <!-- Dental Tooth Artwork — Premium Semi-3D (SVG داخلي، مدموج في تكوين الـHero) -->
+          <svg viewBox="0 0 220 220" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- هالة محيطية ناعمة غير دائرية الطابع (تنزف خارج الإطار) -->
+              <radialGradient id="thHalo" cx=".46" cy=".52" r=".72">
+                <stop offset="0" stop-color="#3fd2da" stop-opacity=".2"/>
+                <stop offset=".5" stop-color="#2ea9cf" stop-opacity=".08"/>
+                <stop offset="1" stop-color="#2ea9cf" stop-opacity="0"/>
+              </radialGradient>
+              <!-- مينا: تدرج هادئ يميل للأزرق ليمتزج مع الخلفية -->
+              <linearGradient id="thEnamel" x1=".2" y1="0" x2=".8" y2="1">
+                <stop offset="0"   stop-color="#f8feff"/>
+                <stop offset=".28" stop-color="#eaf7fc"/>
+                <stop offset=".55" stop-color="#cfe9f4"/>
+                <stop offset=".8"  stop-color="#a4cde2"/>
+                <stop offset="1"   stop-color="#6e9fc6"/>
+              </linearGradient>
+              <!-- تظليل جانبي (Ambient Occlusion) للعمق -->
+              <linearGradient id="thShade" x1=".08" y1=".1" x2=".98" y2=".92">
+                <stop offset="0"   stop-color="#ffffff" stop-opacity="0"/>
+                <stop offset=".55" stop-color="#3d7196" stop-opacity=".14"/>
+                <stop offset="1"   stop-color="#173f63" stop-opacity=".46"/>
+              </linearGradient>
+              <!-- عاج الجذور: يذوب تدريجياً نحو كحلي الخلفية -->
+              <linearGradient id="thRoot" x1=".5" y1=".5" x2=".5" y2="1">
+                <stop offset="0"   stop-color="#5d92b6" stop-opacity="0"/>
+                <stop offset=".55" stop-color="#3d6e96" stop-opacity=".3"/>
+                <stop offset="1"   stop-color="#17395e" stop-opacity=".58"/>
+              </linearGradient>
+              <!-- ظل الخط العنقي -->
+              <linearGradient id="thCervix" x1=".5" y1="0" x2=".5" y2="1">
+                <stop offset="0" stop-color="#245a84" stop-opacity="0"/>
+                <stop offset=".5" stop-color="#245a84" stop-opacity=".24"/>
+                <stop offset="1" stop-color="#245a84" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="thRim" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffffff" stop-opacity=".75"/>
+                <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+              </linearGradient>
+              <!-- انعكاس فيروزي سفلي بدل الظل الأرضي القاسي -->
+              <radialGradient id="thReflect" cx=".5" cy=".5" r=".5">
+                <stop offset="0" stop-color="#2fd0d8" stop-opacity=".22"/>
+                <stop offset="1" stop-color="#2fd0d8" stop-opacity="0"/>
+              </radialGradient>
+              <filter id="thBlurSm" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.4"/></filter>
+              <filter id="thBlurMd" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="4.6"/></filter>
+            </defs>
 
-          <!-- الهالة الخارجية الناعمة -->
-          <circle cx="100" cy="96" r="88" fill="url(#glowOuter)"/>
-          <circle cx="100" cy="90" r="52" fill="url(#glowInner)"/>
+            <!-- محيط بيئي مدموج: هالة منزاحة + قوس جزئي واحد -->
+            <circle cx="101" cy="114" r="118" fill="url(#thHalo)"/>
+            <path d="M 25 148 A 92 92 0 0 1 47 55" fill="none" stroke="#a9ecf7" stroke-width="1.2" opacity=".16" stroke-linecap="round" stroke-dasharray="1.5 8"/>
+            <path d="M 196 78 A 92 92 0 0 1 199 128" fill="none" stroke="#c6f3fb" stroke-width="1.1" opacity=".12" stroke-linecap="round"/>
 
-          <!-- حلقات مدارية تقنية خفيفة جداً -->
-          <circle cx="100" cy="96" r="76" fill="none" stroke="#8fe6f5" stroke-width="1" opacity=".22" stroke-dasharray="2 6"/>
-          <circle cx="100" cy="96" r="64" fill="none" stroke="#bff2ff" stroke-width=".8" opacity=".16"/>
+            <!-- عناصر تقنية شبه مخفية -->
+            <g stroke="#a9ecf7" stroke-width=".7" opacity=".1" stroke-linecap="round">
+              <path d="M38 66h22M38 66v20"/>
+              <path d="M184 144h-22M184 144v-20"/>
+            </g>
+            <g fill="#d4faff">
+              <circle cx="50" cy="50" r="1.2" opacity=".4"/>
+              <circle cx="176" cy="66" r="1" opacity=".32"/>
+              <circle cx="182" cy="132" r="1.3" opacity=".38"/>
+              <circle cx="40" cy="140" r="1" opacity=".3"/>
+            </g>
 
-          <!-- خطوط Grid شفافة جداً -->
-          <g stroke="#a9ecf7" stroke-width=".6" opacity=".14">
-            <line x1="30" y1="60" x2="60" y2="60"/><line x1="30" y1="60" x2="30" y2="90"/>
-            <line x1="140" y1="130" x2="170" y2="130"/><line x1="170" y1="100" x2="170" y2="130"/>
-            <line x1="34" y1="140" x2="34" y2="160"/><line x1="34" y1="160" x2="54" y2="160"/>
-          </g>
+            <!-- انعكاس سفلي ناعم + ظل خفيف جداً -->
+            <ellipse cx="110" cy="190" rx="52" ry="12" fill="url(#thReflect)"/>
+            <ellipse cx="110" cy="188" rx="34" ry="6" fill="#02101f" opacity=".16" filter="url(#thBlurSm)"/>
 
-          <!-- نقاط ضوء صغيرة -->
-          <g fill="#d4faff">
-            <circle cx="46" cy="52" r="1.6" opacity=".85"/>
-            <circle cx="158" cy="66" r="1.3" opacity=".7"/>
-            <circle cx="164" cy="120" r="1.7" opacity=".8"/>
-            <circle cx="38" cy="128" r="1.2" opacity=".6"/>
-            <circle cx="100" cy="24" r="1.4" opacity=".65"/>
-          </g>
+            <!-- ===== السن: تاج بفصّين وجذران طبيعيان بتفرّع واضح ===== -->
+            <g>
+              <!-- الصورة الظلية: مينا -->
+              <path id="thBody" d="M110 35
+                       C 100.4 28.8 88.6 28.2 78.6 32.8
+                       C 62 40.2 52 55.2 53.2 75
+                       C 54.2 92.4 62 102.8 68 112.4
+                       C 74 121.8 76.2 130.8 78 144.6
+                       C 80.4 162 85.2 178.6 94 180.8
+                       C 101 182.2 105.6 169.6 108.4 152
+                       C 110.2 140.6 112.4 136.6 115 136.6
+                       C 117.6 136.6 119.8 140.6 121.6 152
+                       C 124.4 169.6 129 182.2 136 180.8
+                       C 144.8 178.6 149.6 162 152 144.6
+                       C 153.8 130.8 156 121.8 162 112.4
+                       C 168 102.8 175.8 92.4 176.8 75
+                       C 178 55.2 168 40.2 151.4 32.8
+                       C 141.4 28.2 129.6 28.8 120 35
+                       C 116.4 37.3 113.6 37.3 110 35 Z"
+                    fill="url(#thEnamel)"/>
+              <!-- عمق جانبي -->
+              <use href="#thBody" fill="url(#thShade)"/>
+              <!-- عاج الجذور المندمج مع الخلفية -->
+              <path d="M78 144.6 C 80.4 162 85.2 178.6 94 180.8 C 101 182.2 105.6 169.6 108.4 152 C 110.2 140.6 112.4 136.6 115 136.6 C 117.6 136.6 119.8 140.6 121.6 152 C 124.4 169.6 129 182.2 136 180.8 C 144.8 178.6 149.6 162 152 144.6 C 153.6 132.6 155.4 123.4 159.6 115 L 70.4 115 C 74.6 123.4 76.4 132.6 78 144.6 Z"
+                    fill="url(#thRoot)"/>
+              <!-- ظل التفرّع بين الجذرين -->
+              <path d="M104 150 C 108 139 111 135 115 135 C 119 135 122 139 126 150 C 121 144.6 118 142.6 115 142.6 C 112 142.6 109 144.6 104 150 Z"
+                    fill="#1c456b" opacity=".3" filter="url(#thBlurSm)"/>
+              <!-- ظل الخط العنقي (حزام ناعم عند التقاء التاج بالجذور) -->
+              <rect x="60" y="100" width="100" height="22" fill="url(#thCervix)" filter="url(#thBlurSm)"/>
+              <path d="M65 109 C 86 119 134 119 165 109" fill="none" stroke="#2b6088" stroke-width="1.3" opacity=".2" stroke-linecap="round"/>
 
-          <!-- ظل أرضي ناعم أسفل السن -->
-          <ellipse cx="100" cy="168" rx="34" ry="7" fill="#02101f" opacity=".28" filter="url(#blurSm)"/>
+              <!-- تفاصيل المينا: فصوص عمودية ناعمة + أخدود إطباقي -->
+              <path d="M110 37 C 108.2 52 108.2 66 110 82" stroke="#ffffff" stroke-width="2" opacity=".34" fill="none" stroke-linecap="round"/>
+              <path d="M87 42 C 92.6 54 96.2 64 98 76" stroke="#ffffff" stroke-width="1.3" opacity=".16" fill="none" stroke-linecap="round"/>
+              <path d="M133 42 C 128 54 125 64 123.6 76" stroke="#0f4a74" stroke-width="1.2" opacity=".1" fill="none" stroke-linecap="round"/>
+              <!-- حافتان إطباقيتان خفيفتان -->
+              <path d="M92 42.5 C 99 47.5 121 47.5 128 42.5" fill="none" stroke="#39759e" stroke-width="1.1" opacity=".12" stroke-linecap="round"/>
+              <!-- شفافية حافة المينا العلوية -->
+              <path d="M80 33.6 C 65 40.6 55.4 53.6 53.8 71" fill="none" stroke="url(#thRim)" stroke-width="2" opacity=".55" stroke-linecap="round"/>
+              <path d="M140 33.6 C 155 40.6 164.6 53.6 166.2 71" fill="none" stroke="#dff8ff" stroke-width="1.2" opacity=".16" stroke-linecap="round"/>
 
-          <!-- ===== السن ثلاثي الأبعاد ===== -->
-          <g>
-            <!-- التاج (الجزء العلوي المستدير) -->
-            <path d="M100 30
-                     C 128 30, 148 46, 149 68
-                     C 150 84, 142 92, 136 100
-                     C 132 106, 130 112, 129 122
-                     C 128 136, 124 148, 116 150
-                     C 110 151, 107 142, 104 130
-                     C 102 122, 98 122, 96 130
-                     C 93 142, 90 151, 84 150
-                     C 76 148, 72 136, 71 122
-                     C 70 112, 68 106, 64 100
-                     C 58 92, 50 84, 51 68
-                     C 52 46, 72 30, 100 30 Z"
-                  fill="url(#enamel)"/>
-            <path d="M100 30
-                     C 128 30, 148 46, 149 68
-                     C 150 84, 142 92, 136 100
-                     C 132 106, 130 112, 129 122
-                     C 128 136, 124 148, 116 150
-                     C 110 151, 107 142, 104 130
-                     C 102 122, 98 122, 96 130
-                     C 93 142, 90 151, 84 150
-                     C 76 148, 72 136, 71 122
-                     C 70 112, 68 106, 64 100
-                     C 58 92, 50 84, 51 68
-                     C 52 46, 72 30, 100 30 Z"
-                  fill="url(#enamelShade)" opacity=".55"/>
-            <!-- خط الفلجة العلوية الخفيف -->
-            <path d="M100 36 C 100 60, 100 90, 100 122" stroke="#ffffff" stroke-width="2" opacity=".4" fill="none" stroke-linecap="round"/>
-            <!-- بريق لامع (Specular Highlight) -->
-            <ellipse cx="76" cy="54" rx="14" ry="20" fill="#ffffff" opacity=".8" filter="url(#blurSm)" transform="rotate(-18 76 54)"/>
-            <ellipse cx="122" cy="58" rx="7" ry="11" fill="#ffffff" opacity=".45" filter="url(#blurSm)"/>
-          </g>
+              <!-- إضاءة هادئة (Specular مخفَّف) -->
+              <ellipse cx="83" cy="60" rx="12" ry="19" fill="#ffffff" opacity=".38" filter="url(#thBlurMd)" transform="rotate(-15 83 60)"/>
+              <ellipse cx="137" cy="53" rx="5" ry="9" fill="#ffffff" opacity=".2" filter="url(#thBlurSm)"/>
+              <ellipse cx="95" cy="162" rx="3" ry="7" fill="#ffffff" opacity=".13" filter="url(#thBlurSm)"/>
+            </g>
           </svg>
         </div>
       </div>
 
       <!-- بطاقات الإحصائيات -->
-      <div class="dash-stats-row">
+      <div class="dash-quick-surface">
+        <div class="dash-stats-row">
         <button class="dash-card stat-card patients" data-go="patients">
           <span class="stat-top">
             <span class="dash-title">المرضى</span>
@@ -267,30 +297,18 @@
         </button>
       </div>
 
-      <!-- الأزرار الرئيسية -->
-      <div class="dash-main-row">
-        <button class="dash-card main-btn accent" data-go="add">
-          <span class="dash-info"><span class="dash-title">إضافة مريض</span><span class="dash-sub">جديد</span></span>
-          <span class="dash-emoji"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
-        </button>
-        <button class="dash-card main-btn support" data-go="support">
-          <span class="dash-info"><span class="dash-title">الدعم والتفعيل</span><span class="dash-sub">عرض</span></span>
-          <span class="dash-emoji"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5V10a2 2 0 0 0 0 4v2.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 16.5V14a2 2 0 0 0 0-4z"/><path d="M13.5 6.5v11"/></svg></span>
-        </button>
-      </div>
-
-      <!-- البطاقات الثانوية -->
-      <div class="dash-sec-row">
-        <button class="dash-card sec-card" data-go="backup">
-          <span class="dash-emoji"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17.5a4.5 4.5 0 0 1-.5-8.97 5.5 5.5 0 0 1 10.6-1.8A4.5 4.5 0 0 1 17 17.5z"/><path d="M12 11v7M9.2 15.2 12 18l2.8-2.8"/></svg></span>
-          <span class="dash-info"><span class="dash-title">النسخة الاحتياطية</span><span class="dash-sub">حفظ/استعادة</span></span>
-          <span class="sec-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span>
-        </button>
-        <button class="dash-card sec-card" data-go="reports">
-          <span class="dash-emoji"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
-          <span class="dash-info"><span class="dash-title">التقارير</span><span class="dash-sub">عرض</span></span>
-          <span class="sec-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span>
-        </button>
+        <button class="dash-card dash-primary-cta" data-go="add" type="button">
+        <span class="cta-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="8.5" cy="7" r="3.5"/><path d="M19 8v6M16 11h6"/></svg>
+        </span>
+        <span class="cta-text">
+          <b>إضافة مريض جديد</b>
+          <small>سجّل مريضاً وابدأ خطة العلاج مباشرة</small>
+        </span>
+        <span class="cta-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+        </span>
+      </button>
       </div>
 
       <div class="section-head" id="todaySection">
@@ -301,19 +319,28 @@
 
     <!-- ============ جميع المرضى ============ -->
     <section class="view" id="view-patients" data-view="patients" hidden>
-      <div class="page-head">
-        <h2>👥 المرضى الحاليون</h2>
+      <div class="page-head pat-head">
+        <h2><span class="ph-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="8.5" cy="7" r="3.5"/><path d="M17 4.2a3.5 3.5 0 0 1 0 6.6M22 20v-1.5a4 4 0 0 0-3-3.8"/></svg></span> المرضى الحاليون</h2>
         <div class="page-tools">
-          <div class="search-box sm">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-            <input type="search" id="searchInput" placeholder="بحث…" autocomplete="off" />
-          </div>
-          <button id="completedBtn" class="btn btn-ghost">✅ المكتملون <span id="completedCount">0</span></button>
+          <button id="completedBtn" class="btn btn-ghost">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.3l2.4 2.4 5-5"/></svg>
+            المكتملون <span id="completedCount">0</span>
+          </button>
           <button id="addBtn" class="btn btn-primary">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
             إضافة مريض
           </button>
         </div>
+      </div>
+      <div class="search-box pat-search">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" id="searchInput" placeholder="بحث بالاسم أو الهاتف أو نوع العلاج…" autocomplete="off" />
+      </div>
+      <div class="filter-bar" id="patientsFilterBar" role="tablist" aria-label="فلترة المرضى حسب الموعد">
+        <button type="button" class="filter-chip active" data-filter="all">الكل</button>
+        <button type="button" class="filter-chip" data-filter="today">موعد اليوم</button>
+        <button type="button" class="filter-chip" data-filter="late">متأخر</button>
+        <button type="button" class="filter-chip" data-filter="upcoming">قادم</button>
       </div>
       <div id="patientsList" class="cards-grid"></div>
       <div id="emptyState" class="empty-state" hidden>
@@ -324,7 +351,7 @@
 
     <!-- ============ المرضى المكتملون ============ -->
     <section class="view" id="view-completed" data-view="completed" hidden>
-      <div class="page-head"><h2>✅ المرضى المكتملون</h2></div>
+      <div class="page-head"><h2><span class="ph-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.3l2.4 2.4 5-5"/></svg></span> المرضى المكتملون</h2></div>
       <div id="completedList" class="cards-grid"></div>
       <div id="completedEmpty" class="empty-state" hidden>
         <p>لا يوجد مرضى مكتملون بعد.</p>
@@ -334,13 +361,14 @@
 
     <!-- ============ المواعيد المتأخرة ============ -->
     <section class="view" id="view-late" data-view="late" hidden>
-      <div class="page-head"><h2>⚠️ المواعيد المتأخرة</h2></div>
+      <div class="page-head"><h2><span class="ph-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6 2.8 19.5a1.2 1.2 0 0 0 1 1.8h16.4a1.2 1.2 0 0 0 1-1.8z"/><path d="M12 9.5v4.2M12 17.4h.01"/></svg></span> المواعيد المتأخرة</h2></div>
       <div id="lateList" class="cards-grid"></div>
       <div id="lateEmpty" class="empty-state" hidden>
         <p>لا توجد مواعيد متأخرة.</p>
         <span>جميع المواعيد ضمن الجدول الزمني.</span>
       </div>
     </section>
+
 
     <!-- ============ الإحصائيات ============ -->
     <section class="view" id="view-stats" data-view="stats" hidden>
@@ -432,16 +460,76 @@
     </button>
   </nav>
 
+  <!-- القائمة الجانبية (Side Drawer) — عنصر جديد، تنقّل فقط عبر go() الحالي -->
+  <div id="drawerOverlay" class="drawer-overlay" hidden></div>
+  <aside id="sideDrawer" class="side-drawer" role="dialog" aria-modal="true" aria-label="القائمة الرئيسية" aria-hidden="true">
+    <span class="drawer-grid" aria-hidden="true"></span>
+    <div class="drawer-head">
+      <span class="drawer-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7.5 3.2C5.4 3.2 4 4.9 4 7.2c0 1.6.4 2.6.8 4.2.5 1.9.5 3 .8 4.7.3 1.7.6 4 1.6 4 1 0 1.2-1.6 1.5-3.1.3-1.5.5-2.7 1.7-2.7s1.4 1.2 1.7 2.7c.3 1.5.5 3.1 1.5 3.1 1 0 1.3-2.3 1.6-4 .3-1.7.3-2.8.8-4.7.4-1.6.8-2.6.8-4.2C20 4.9 18.6 3.2 16.5 3.2c-1.7 0-2.6.9-4.5.9s-2.8-.9-4.5-.9Z"/>
+        </svg>
+      </span>
+      <div class="drawer-brand">
+        <b>DentPilot</b>
+        <span id="drawerDocName">د. —</span>
+      </div>
+      <button type="button" id="drawerClose" class="drawer-close" aria-label="إغلاق القائمة">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <nav class="drawer-nav" aria-label="التنقل">
+      <button type="button" class="drawer-link" data-go="dashboard">
+        <span class="dl-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.4 12 4l8 6.4V19a1.6 1.6 0 0 1-1.6 1.6h-3.6v-5.8H9.2v5.8H5.6A1.6 1.6 0 0 1 4 19z"/></svg></span>
+        <span class="dl-txt">الرئيسية</span>
+        <span class="dl-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span>
+      </button>
+      <button type="button" class="drawer-link" data-go="patients">
+        <span class="dl-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="8.5" cy="7" r="3.5"/><path d="M17 4.2a3.5 3.5 0 0 1 0 6.6M22 20v-1.5a4 4 0 0 0-3-3.8"/></svg></span>
+        <span class="dl-txt">المرضى</span>
+        <span class="dl-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span>
+      </button>
+      <div class="drawer-sep" aria-hidden="true"><span>الأدوات</span></div>
+      <button type="button" class="drawer-link" data-go="reports">
+        <span class="dl-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+        <span class="dl-txt">التقارير</span>
+        <span class="dl-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span>
+      </button>
+      <button type="button" class="drawer-link" data-go="backup">
+        <span class="dl-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17.5a4.5 4.5 0 0 1-.5-8.97 5.5 5.5 0 0 1 10.6-1.8A4.5 4.5 0 0 1 17 17.5z"/><path d="M12 11v7M9.2 15.2 12 18l2.8-2.8"/></svg></span>
+        <span class="dl-txt">النسخة الاحتياطية</span>
+        <span class="dl-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span>
+      </button>
+      <button type="button" class="drawer-link" data-go="support">
+        <span class="dl-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5V10a2 2 0 0 0 0 4v2.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 16.5V14a2 2 0 0 0 0-4z"/><path d="M13.5 6.5v11"/></svg></span>
+        <span class="dl-txt">الدعم والتفعيل</span>
+        <span class="dl-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span>
+      </button>
+      <div class="drawer-sep" aria-hidden="true"></div>
+      <button type="button" class="drawer-link" data-go="settings">
+        <span class="dl-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4 17 7M7 17l-1.6 1.6M18.6 18.6 17 17M7 7 5.4 5.4"/></svg></span>
+        <span class="dl-txt">الإعدادات</span>
+        <span class="dl-chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span>
+      </button>
+    </nav>
+    <div class="drawer-foot">نظام إدارة ومتابعة المرضى</div>
+  </aside>
+
   <!-- نافذة إضافة/تعديل المريض -->
   <div id="modalOverlay" class="modal-overlay" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-head">
+        <button id="modalClose" class="modal-close fp-back" aria-label="رجوع">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
         <h2 id="modalTitle">إضافة مريض جديد</h2>
-        <button id="modalClose" class="modal-close" aria-label="إغلاق">✕</button>
       </div>
       <form id="patientForm" class="form" novalidate>
         <input type="hidden" id="patientId" />
-        <p class="form-section">بيانات المريض</p>
+        <div class="fp-section" id="fpSec1">
+        <div class="fp-section-head"><span class="fp-ico"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 20v-1.2A4.3 4.3 0 0 1 8.8 14.5h6.4a4.3 4.3 0 0 1 4.3 4.3V20"/><circle cx="12" cy="7.3" r="3.8"/></svg></span><h3>بيانات المريض</h3></div>
+        <div class="fp-section-body">
+
         <div class="field"><label for="name">اسم المريض</label><input type="text" id="name" required placeholder="الاسم الكامل" /></div>
         <div class="field-row-2">
           <div class="field">
@@ -464,7 +552,13 @@
           <input type="hidden" id="gender" />
         </div>
 
-        <p class="form-section">تفاصيل العلاج</p>
+                </div>
+      </div>
+
+<div class="fp-section" id="fpSec2">
+        <div class="fp-section-head"><span class="fp-ico"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 3.2C5.4 3.2 4 4.9 4 7.2c0 1.6.4 2.6.8 4.2.5 1.9.5 3 .8 4.7.3 1.7.6 4 1.6 4 1 0 1.2-1.6 1.5-3.1.3-1.5.5-2.7 1.7-2.7s1.4 1.2 1.7 2.7c.3 1.5.5 3.1 1.5 3.1 1 0 1.3-2.3 1.6-4 .3-1.7.3-2.8.8-4.7.4-1.6.8-2.6.8-4.2C20 4.9 18.6 3.2 16.5 3.2c-1.7 0-2.6.9-4.5.9s-2.8-.9-4.5-.9Z"/></svg></span><h3>تفاصيل العلاج</h3></div>
+        <div class="fp-section-body">
+
         <div class="grid-2">
           <div class="field">
             <label for="treatmentTrigger">العمل / نوع العلاج</label>
@@ -635,7 +729,13 @@
         <!-- ============ نهاية الحقول الديناميكية ============ -->
 
         <div class="field"><label for="secondSession">تاريخ ووقت الجلسة الثانية</label><input type="datetime-local" id="secondSession" /></div>
-        <p class="form-section">التفاصيل المالية</p>
+                </div>
+      </div>
+
+<div class="fp-section" id="fpSec3">
+        <div class="fp-section-head"><span class="fp-ico"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.4"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9v0M18 15v0"/></svg></span><h3>التفاصيل المالية</h3></div>
+        <div class="fp-section-body">
+
         <div class="field-row-2">
           <div class="field"><label for="total">المبلغ كامل</label><input type="number" id="total" min="0" step="any" placeholder="0" /></div>
           <div class="field"><label for="paid">المدفوع</label><input type="number" id="paid" min="0" step="any" placeholder="0" /></div>
@@ -644,9 +744,18 @@
           <span class="remaining-label">المتبقي (تلقائي)</span>
           <input type="text" id="remaining" class="remaining-value" value="0" readonly />
         </div>
-        <p class="form-section">ملاحظات</p>
+                </div>
+      </div>
+
+<div class="fp-section" id="fpSec4">
+        <div class="fp-section-head"><span class="fp-ico"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9l3.5 3.5V19a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 19V5A1.5 1.5 0 0 1 6 3.5Z"/><path d="M14.5 3.5V7a1 1 0 0 0 1 1h3.5"/><path d="M8 12h8M8 15.5h5.5"/></svg></span><h3>ملاحظات</h3></div>
+        <div class="fp-section-body">
+
         <div class="field"><textarea id="notes" rows="3" placeholder="ملاحظات عامة عن المريض (اختياري)"></textarea></div>
-        <div class="form-actions">
+                </div>
+      </div>
+
+      <div class="form-actions">
           <button type="button" id="cancelBtn" class="btn btn-ghost">إلغاء</button>
           <button type="submit" class="btn btn-primary">حفظ البيانات</button>
         </div>

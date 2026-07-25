@@ -48,7 +48,7 @@
   };
 
   const $ = (id) => document.getElementById(id);
-  const APP_VERSION = '2.4.2';
+  const APP_VERSION = '2.5.1';
   const els = {
     splash: $('splash'), backBtn: $('backBtn'), installBtn: $('installBtn'), docLabel: $('docLabel'),
     trialBanner: $('trialBanner'), trialText: $('trialText'),
@@ -65,6 +65,7 @@
     dcPatients: $('dcPatients'), dcToday: $('dcToday'), dcLate: $('dcLate'), todayList: $('todayList'),
     // المرضى
     patientsList: $('patientsList'), empty: $('emptyState'), search: $('searchInput'),
+    patientsFilterBar: $('patientsFilterBar'),
     addBtn: $('addBtn'), completedBtn: $('completedBtn'), completedCount: $('completedCount'),
     // المكتملون
     completedList: $('completedList'), completedEmpty: $('completedEmpty'),
@@ -132,6 +133,7 @@
   let fileOrigin = 'patients';
   let pendingScrollToday = false;
   let toastTimer = null;
+  let patientsFilter = 'all'; // 'all' | 'today' | 'late' | 'upcoming' — فلترة عرض فقط، لا تغيير في البيانات
 
   const VIEWS = ['dashboard', 'patients', 'completed', 'late', 'stats', 'reports', 'backup', 'support', 'file'];
 
@@ -193,6 +195,38 @@
   function phoneDigits(p) { return String(p || '').replace(/\D/g, ''); }
   function initial(name) { const t = (name || '').trim(); return t ? t[0] : 'م'; }
   function debounce(fn, ms) { let t; return function () { const a = arguments, c = this; clearTimeout(t); t = setTimeout(() => fn.apply(c, a), ms); }; }
+
+  /* ============================================================
+     أيقونات SVG موحّدة (Stroke، بلا Emoji) — بصري فقط، تُستخدم في
+     قائمة المرضى وملف المريض وإضافة مريض. لا تُقرأ أو تُعالج من أي
+     منطق؛ استبدال بصري بحت لرموز الإيموجي القديمة.
+     ============================================================ */
+  const ICO = {
+    open:     '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.2l1.8 2h8.5A1.5 1.5 0 0 1 21 9.5v8A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/></svg>',
+    call:     '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16.5v2.6a1.6 1.6 0 0 1-1.8 1.6A18.2 18.2 0 0 1 3.3 4.8 1.6 1.6 0 0 1 4.9 3h2.6a1.6 1.6 0 0 1 1.6 1.4c.1.9.3 1.8.7 2.7a1.6 1.6 0 0 1-.4 1.7L8.3 9.9a15.3 15.3 0 0 0 5.8 5.8l1.1-1.1a1.6 1.6 0 0 1 1.7-.4c.9.4 1.8.6 2.7.7a1.6 1.6 0 0 1 1.4 1.6z"/></svg>',
+    wa:       '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.8L3.5 20.5l4.3-1.1A8.5 8.5 0 1 0 12 3.5z"/><path d="M8.8 9.2c0 3.3 2.7 6 6 6l1.3-1.3-1.9-1.2-1 .7a4.6 4.6 0 0 1-2.6-2.6l.7-1-1.2-1.9z"/></svg>',
+    print:    '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8.5V4h10v4.5"/><rect x="4.5" y="8.5" width="15" height="7.5" rx="1.6"/><path d="M7 14.5h10V20H7z"/></svg>',
+    restore:  '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5A8.5 8.5 0 1 1 5 15.5"/><path d="M3.5 4.5v5h5"/></svg>',
+    trash:    '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M9.5 7V5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 5v2M18 7l-.8 12.1A2 2 0 0 1 15.2 21H8.8a2 2 0 0 1-2-1.9L6 7"/><path d="M10 11v6M14 11v6"/></svg>',
+    edit:     '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3"/><path d="M14 7l3 3"/></svg>',
+    check:    '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+    checkCircle: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.3l2.4 2.4 5-5"/></svg>',
+    circle:   '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="8.5"/></svg>',
+    plus:     '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
+    user:     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 20v-1.2A4.3 4.3 0 0 1 8.8 14.5h6.4a4.3 4.3 0 0 1 4.3 4.3V20"/><circle cx="12" cy="7.3" r="3.8"/></svg>',
+    tooth:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 3.2C5.4 3.2 4 4.9 4 7.2c0 1.6.4 2.6.8 4.2.5 1.9.5 3 .8 4.7.3 1.7.6 4 1.6 4 1 0 1.2-1.6 1.5-3.1.3-1.5.5-2.7 1.7-2.7s1.4 1.2 1.7 2.7c.3 1.5.5 3.1 1.5 3.1 1 0 1.3-2.3 1.6-4 .3-1.7.3-2.8.8-4.7.4-1.6.8-2.6.8-4.2C20 4.9 18.6 3.2 16.5 3.2c-1.7 0-2.6.9-4.5.9s-2.8-.9-4.5-.9Z"/></svg>',
+    money:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.4"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9v0M18 15v0"/></svg>',
+    warn:     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6 2.8 19.5a1.2 1.2 0 0 0 1 1.8h16.4a1.2 1.2 0 0 0 1-1.8z"/><path d="M12 9.5v4.2M12 17.4h.01"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M15.5 3v4M8.5 3v4M3.5 9.5h17"/></svg>',
+    clock:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+    note:     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9l3.5 3.5V19a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 19V5A1.5 1.5 0 0 1 6 3.5Z"/><path d="M14.5 3.5V7a1 1 0 0 0 1 1h3.5"/><path d="M8 12h8M8 15.5h5.5"/></svg>',
+    wallet:   '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18a1 1 0 0 1 1 1v2"/><path d="M4 7.5v10A2.5 2.5 0 0 0 6.5 20H19a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 1 4 7.5Z"/><circle cx="16.2" cy="14" r="1.4"/></svg>',
+    paperclip:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12.5l6.5-6.5a3 3 0 0 1 4.2 4.2l-8 8a5 5 0 0 1-7-7l7.3-7.3"/></svg>',
+    filePdf:  '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h8l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 19V5A1.5 1.5 0 0 1 6 3.5Z"/><path d="M14 3.5V7a1 1 0 0 0 1 1h3.5"/><path d="M8 14h1.2a1.2 1.2 0 1 1 0 2.4H8zM12.3 14v3.4M15 14h1.4v3.4H15"/></svg>',
+    fileGeneric:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h8l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 19V5A1.5 1.5 0 0 1 6 3.5Z"/><path d="M14 3.5V7a1 1 0 0 0 1 1h3.5"/></svg>',
+    back:     '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
+    phone:    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16.5v2.6a1.6 1.6 0 0 1-1.8 1.6A18.2 18.2 0 0 1 3.3 4.8 1.6 1.6 0 0 1 4.9 3h2.6a1.6 1.6 0 0 1 1.6 1.4c.1.9.3 1.8.7 2.7a1.6 1.6 0 0 1-.4 1.7L8.3 9.9a15.3 15.3 0 0 0 5.8 5.8l1.1-1.1a1.6 1.6 0 0 1 1.7-.4c.9.4 1.8.6 2.7.7a1.6 1.6 0 0 1 1.4 1.6z"/></svg>',
+  };
 
   function regDateFromId(id) {
     try {
@@ -269,13 +303,13 @@
      ============================================================ */
   function callLink(phone, cls, label) {
     const p = (phone || '').trim();
-    return p ? `<a class="card-btn call ${cls}" href="tel:${encodeURIComponent(p)}" title="اتصال">📞${label}</a>`
-             : `<span class="card-btn call disabled ${cls}" title="لا يوجد رقم">📞${label}</span>`;
+    return p ? `<a class="card-btn call ${cls}" href="tel:${encodeURIComponent(p)}" title="اتصال">${ICO.call}${label}</a>`
+             : `<span class="card-btn call disabled ${cls}" title="لا يوجد رقم">${ICO.call}${label}</span>`;
   }
   function waLink(phone, cls, label) {
     const d = phoneDigits(phone);
-    return d ? `<a class="card-btn wa ${cls}" href="https://wa.me/${d}" target="_blank" rel="noopener" title="واتساب">💬${label}</a>`
-             : `<span class="card-btn wa disabled ${cls}" title="لا يوجد رقم">💬${label}</span>`;
+    return d ? `<a class="card-btn wa ${cls}" href="https://wa.me/${d}" target="_blank" rel="noopener" title="واتساب">${ICO.wa}${label}</a>`
+             : `<span class="card-btn wa disabled ${cls}" title="لا يوجد رقم">${ICO.wa}${label}</span>`;
   }
 
   /* ============================================================
@@ -298,14 +332,28 @@
       els.todayList.innerHTML = '<div class="empty-state"><p>لا توجد مواعيد اليوم.</p><span>المواعيد المجدولة لليوم ستظهر هنا.</span></div>';
       return;
     }
+    // أيقونات SVG موحّدة (Stroke) لبطاقات مواعيد اليوم — بصري فقط، نفس الإجراءات والروابط تماماً
+    const svgOpen = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.2l1.8 2h8.5A1.5 1.5 0 0 1 21 9.5v8A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/></svg>';
+    const svgCall = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16.5v2.6a1.6 1.6 0 0 1-1.8 1.6A18.2 18.2 0 0 1 3.3 4.8 1.6 1.6 0 0 1 4.9 3h2.6a1.6 1.6 0 0 1 1.6 1.4c.1.9.3 1.8.7 2.7a1.6 1.6 0 0 1-.4 1.7L8.3 9.9a15.3 15.3 0 0 0 5.8 5.8l1.1-1.1a1.6 1.6 0 0 1 1.7-.4c.9.4 1.8.6 2.7.7a1.6 1.6 0 0 1 1.4 1.6z"/></svg>';
+    const svgWa = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.8L3.5 20.5l4.3-1.1A8.5 8.5 0 1 0 12 3.5z"/><path d="M8.8 9.2c0 3.3 2.7 6 6 6l1.3-1.3-1.9-1.2-1 .7a4.6 4.6 0 0 1-2.6-2.6l.7-1-1.2-1.9z"/></svg>';
+    const todayCall = (phone) => {
+      const p = (phone || '').trim();
+      return p ? `<a class="card-btn call icon-only" href="tel:${encodeURIComponent(p)}" title="اتصال">${svgCall}</a>`
+               : `<span class="card-btn call disabled icon-only" title="لا يوجد رقم">${svgCall}</span>`;
+    };
+    const todayWa = (phone) => {
+      const d = phoneDigits(phone);
+      return d ? `<a class="card-btn wa icon-only" href="https://wa.me/${d}" target="_blank" rel="noopener" title="واتساب">${svgWa}</a>`
+               : `<span class="card-btn wa disabled icon-only" title="لا يوجد رقم">${svgWa}</span>`;
+    };
     els.todayList.innerHTML = list.map(p => `
       <div class="appt-item">
         <div class="appt-when"><span class="lbl">اليوم</span><span class="t">${escapeHtml(fmtTime(p.secondSession))}</span></div>
         <div class="appt-main"><div class="nm">${escapeHtml(p.name)}</div><div class="tr">${escapeHtml(p.treatment) || 'بدون تفاصيل علاج'}</div></div>
         <div class="appt-btns">
-          <button class="card-btn open icon-only" data-act="open" data-id="${p.id}" title="فتح الملف">📂</button>
-          ${callLink(p.phone, 'icon-only', '')}
-          ${waLink(p.phone, 'icon-only', '')}
+          <button class="card-btn open icon-only" data-act="open" data-id="${p.id}" title="فتح الملف">${svgOpen}</button>
+          ${todayCall(p.phone)}
+          ${todayWa(p.phone)}
         </div>
       </div>`).join('');
   }
@@ -325,25 +373,29 @@
         <span class="pcard-avatar">${escapeHtml(initial(p.name))}</span>
         <div class="pcard-id">
           <div class="pcard-name">${escapeHtml(p.name)}</div>
-          <div class="pcard-treat">${escapeHtml(p.treatment) || 'بدون نوع علاج'}${p.phone ? ' • ' + escapeHtml(p.phone) : ''}</div>
+          <div class="pcard-treat">
+            <span class="pcard-treat-ico" aria-hidden="true">${ICO.tooth}</span>
+            <span>${escapeHtml(p.treatment) || 'بدون نوع علاج'}</span>
+          </div>
+          ${p.phone ? `<div class="pcard-phone"><span aria-hidden="true">${ICO.phone}</span><span>${escapeHtml(p.phone)}</span></div>` : ''}
         </div>
         <span class="pcard-status st-${st.key}">${st.label}</span>
       </div>
       <div class="pcard-money">
         <span><i>التكلفة</i><b>${fmt(t.cost)}</b></span>
         <span><i>المدفوع</i><b>${fmt(t.paid)}</b></span>
-        <span><i>المتبقي</i><b class="${remCls}">${fmt(t.remaining)}</b></span>
+        <span class="rem"><i>المتبقي</i><b class="${remCls}">${fmt(t.remaining)}</b></span>
       </div>
       <div class="pcard-sub">
         <span class="ps-appt">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <span aria-hidden="true">${ICO.calendar}</span>
           <span>${appt}</span>
         </span>
       </div>
       <div class="pcard-actions">
-        <button class="card-btn open" data-act="open" data-id="${p.id}">📂 ملف</button>
-        ${callLink(p.phone, '', ' اتصال')}
-        ${waLink(p.phone, '', ' واتساب')}
+        <button class="card-btn open primary" data-act="open" data-id="${p.id}">${ICO.open} فتح الملف</button>
+        ${callLink(p.phone, 'icon-only', '')}
+        ${waLink(p.phone, 'icon-only', '')}
       </div>
     </div>`;
   }
@@ -357,21 +409,25 @@
         <span class="pcard-avatar done">${escapeHtml(initial(p.name))}</span>
         <div class="pcard-id">
           <div class="pcard-name">${escapeHtml(p.name)}</div>
-          <div class="pcard-treat">${escapeHtml(p.treatment) || 'بدون نوع علاج'}${p.phone ? ' • ' + escapeHtml(p.phone) : ''}</div>
+          <div class="pcard-treat">
+            <span class="pcard-treat-ico" aria-hidden="true">${ICO.tooth}</span>
+            <span>${escapeHtml(p.treatment) || 'بدون نوع علاج'}</span>
+          </div>
+          ${p.phone ? `<div class="pcard-phone"><span aria-hidden="true">${ICO.phone}</span><span>${escapeHtml(p.phone)}</span></div>` : ''}
         </div>
-        <span class="pcard-status st-done">✅ مكتمل</span>
+        <span class="pcard-status st-done">${ICO.checkCircle} مكتمل</span>
       </div>
       <div class="pcard-money">
         <span><i>التكلفة</i><b>${fmt(t.cost)}</b></span>
         <span><i>المدفوع</i><b>${fmt(t.paid)}</b></span>
-        <span><i>المتبقي</i><b class="${remCls}">${fmt(t.remaining)}</b></span>
+        <span class="rem"><i>المتبقي</i><b class="${remCls}">${fmt(t.remaining)}</b></span>
       </div>
-      <div class="pcard-sub"><span class="ps-appt"><span>📅 اكتمل في: ${escapeHtml(fmtDate(p.completedAt))}</span></span></div>
+      <div class="pcard-sub"><span class="ps-appt"><span aria-hidden="true">${ICO.calendar}</span><span>اكتمل في: ${escapeHtml(fmtDate(p.completedAt))}</span></span></div>
       <div class="pcard-actions">
-        <button class="card-btn open" data-act="open" data-id="${p.id}">📂 ملف</button>
-        <button class="card-btn print" data-act="print" data-id="${p.id}">🖨 طباعة</button>
-        <button class="card-btn restore" data-act="restore" data-id="${p.id}">🔄 استعادة</button>
-        <button class="card-btn del" data-act="purge" data-id="${p.id}">🗑 حذف نهائي</button>
+        <button class="card-btn open primary" data-act="open" data-id="${p.id}">${ICO.open} فتح الملف</button>
+        <button class="card-btn print" data-act="print" data-id="${p.id}">${ICO.print} طباعة</button>
+        <button class="card-btn restore" data-act="restore" data-id="${p.id}">${ICO.restore} استعادة</button>
+        <button class="card-btn del" data-act="purge" data-id="${p.id}">${ICO.trash} حذف نهائي</button>
       </div>
     </div>`;
   }
@@ -379,9 +435,19 @@
   function renderPatients() {
     const q = els.search.value.trim().toLowerCase();
     const base = activePatients();
-    const list = q ? base.filter(p =>
+    let list = q ? base.filter(p =>
       (p.name || '').toLowerCase().includes(q) || (p.phone || '').toLowerCase().includes(q) || (p.treatment || '').toLowerCase().includes(q)
     ) : base;
+    if (patientsFilter !== 'all') {
+      list = list.filter(p => {
+        const k = statusOf(p).key;
+        if (patientsFilter === 'upcoming') return k === 'upcoming' || k === 'tomorrow';
+        return k === patientsFilter;
+      });
+    }
+    if (els.patientsFilterBar) {
+      els.patientsFilterBar.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === patientsFilter));
+    }
     if (base.length === 0) {
       els.patientsList.innerHTML = ''; els.empty.hidden = false;
       els.empty.querySelector('p').textContent = 'لا يوجد مرضى مسجّلون بعد.';
@@ -389,7 +455,7 @@
     } else if (list.length === 0) {
       els.patientsList.innerHTML = ''; els.empty.hidden = false;
       els.empty.querySelector('p').textContent = 'لا توجد نتائج مطابقة.';
-      els.empty.querySelector('span').textContent = 'جرّب البحث بالاسم أو رقم الهاتف أو نوع العلاج.';
+      els.empty.querySelector('span').textContent = 'جرّب البحث بالاسم أو رقم الهاتف أو نوع العلاج، أو غيّر الفلتر.';
     } else {
       els.empty.hidden = true; els.patientsList.innerHTML = list.map(patientCard).join('');
     }
@@ -620,48 +686,59 @@
     const actions = p.completed ? `
         ${callLink(p.phone, '', ' اتصال')}
         ${waLink(p.phone, '', ' واتساب')}
-        <button class="card-btn print" data-act="print" data-id="${p.id}">🖨 طباعة</button>
-        <button class="card-btn restore" data-act="restore" data-id="${p.id}">🔄 استعادة</button>
-        <button class="card-btn del" data-act="purge" data-id="${p.id}">🗑 حذف نهائي</button>` : `
+        <button class="card-btn print" data-act="print" data-id="${p.id}">${ICO.print} طباعة</button>
+        <button class="card-btn restore" data-act="restore" data-id="${p.id}">${ICO.restore} استعادة</button>
+        <button class="card-btn del" data-act="purge" data-id="${p.id}">${ICO.trash} حذف نهائي</button>` : `
         ${callLink(p.phone, '', ' اتصال')}
         ${waLink(p.phone, '', ' واتساب')}
-        <button class="card-btn edit" data-act="edit" data-id="${p.id}">✏️ تعديل</button>
-        <button class="card-btn print" data-act="print" data-id="${p.id}">🖨 طباعة</button>
-        <button class="card-btn complete" data-act="finish" data-id="${p.id}">✅ إنهاء العلاج</button>
-        <button class="card-btn del" data-act="del" data-id="${p.id}">🗑️ حذف</button>`;
+        <button class="card-btn edit" data-act="edit" data-id="${p.id}">${ICO.edit} تعديل</button>
+        <button class="card-btn print" data-act="print" data-id="${p.id}">${ICO.print} طباعة</button>
+        <button class="card-btn complete" data-act="finish" data-id="${p.id}">${ICO.checkCircle} إنهاء العلاج</button>
+        <button class="card-btn del" data-act="del" data-id="${p.id}">${ICO.trash} حذف</button>`;
+
+    const quickNav = `<nav class="file-quicknav" aria-label="التنقل داخل ملف المريض">
+        <a href="#fsInfo">${ICO.user}<span>المعلومات</span></a>
+        <a href="#fsSessions">${ICO.tooth}<span>الجلسات</span></a>
+        <a href="#fsPayments">${ICO.wallet}<span>الدفعات</span></a>
+        <a href="#fsAttachments">${ICO.paperclip}<span>المرفقات</span></a>
+        ${p.notes ? `<a href="#fsNotes">${ICO.note}<span>ملاحظات</span></a>` : ''}
+      </nav>`;
 
     fb.innerHTML = `
       <div class="file-hero ${p.completed ? 'done' : ''}">
+        <span class="file-hero-grid" aria-hidden="true"></span>
         <span class="file-avatar">${escapeHtml(initial(p.name))}</span>
         <div class="file-hero-main">
           <h2>${escapeHtml(p.name)}</h2>
-          <div class="file-hero-sub">${escapeHtml(p.treatment) || 'بدون نوع علاج'}</div>
+          <div class="file-hero-sub"><span aria-hidden="true">${ICO.tooth}</span>${escapeHtml(p.treatment) || 'بدون نوع علاج'}</div>
         </div>
-        <span class="file-status ${p.completed ? 'st-done' : 'st-' + st.key}">${p.completed ? '✅ مكتمل' : st.label}</span>
+        <span class="file-status ${p.completed ? 'st-done' : 'st-' + st.key}">${p.completed ? ICO.checkCircle + ' مكتمل' : st.label}</span>
       </div>
 
       ${p.completed ? `<div class="done-banner">تم إنهاء علاج هذا المريض وأرشفته في ${escapeHtml(fmtDateTime(p.completedAt))}.</div>` : ''}
 
       <div class="file-actions">${actions}</div>
 
-      <div class="file-block">
-        <div class="fs-head plain"><span class="fs-ico">🧾</span><h3>معلومات المريض</h3></div>
+      ${quickNav}
+
+      <div class="file-block" id="fsInfo">
+        <div class="fs-head plain"><span class="fs-ico">${ICO.user}</span><h3>معلومات المريض</h3></div>
         <div class="info-grid">
-          ${info('👤', 'الاسم', escapeHtml(p.name))}
-          ${info('📞', 'رقم الهاتف', escapeHtml(p.phone) || '—')}
-          ${info('🦷', 'نوع العلاج', escapeHtml(p.treatment) || '—')}
-          ${info('💰', 'تكلفة العلاج', fmt(tt.cost))}
-          ${info('✅', 'إجمالي المدفوع', fmt(tt.paid))}
-          ${info('⚠️', 'المبلغ المتبقي', fmt(tt.remaining), remCls)}
-          ${info('🗓️', 'الموعد القادم', apptStr)}
-          ${info('📅', 'تاريخ الإضافة', regStr)}
+          ${info(ICO.user, 'الاسم', escapeHtml(p.name))}
+          ${info(ICO.phone, 'رقم الهاتف', escapeHtml(p.phone) || '—')}
+          ${info(ICO.tooth, 'نوع العلاج', escapeHtml(p.treatment) || '—')}
+          ${info(ICO.money, 'تكلفة العلاج', fmt(tt.cost))}
+          ${info(ICO.check, 'إجمالي المدفوع', fmt(tt.paid))}
+          ${info(ICO.warn, 'المبلغ المتبقي', fmt(tt.remaining), remCls)}
+          ${info(ICO.calendar, 'الموعد القادم', apptStr)}
+          ${info(ICO.clock, 'تاريخ الإضافة', regStr)}
         </div>
-        ${p.notes ? `<div class="notes-card"><span class="info-label">📝 ملاحظات</span><p class="notes-text">${escapeHtml(p.notes)}</p></div>` : ''}
       </div>
 
       ${sessionsSection(p)}
       ${paymentsSection(p)}
       ${attachmentsSection(p)}
+      ${notesSection(p)}
     `;
   }
 
@@ -675,23 +752,23 @@
           <span class="sess-no">جلسة ${escapeHtml(s.number) || '—'}</span>
           <span class="sess-when">${escapeHtml(fmtDate(s.date))}${s.date ? ' • ' + escapeHtml(weekday(s.date)) : ''}${s.time ? ' • ' + escapeHtml(s.time) : ''}</span>
           <span class="sess-tools">
-            <button class="mini-btn ${s.completed ? 'on' : ''}" data-act="sess-toggle" data-id="${p.id}" data-sid="${s.id}" title="${s.completed ? 'مكتملة' : 'تعليم كمكتملة'}">${s.completed ? '✅' : '⭕'}</button>
-            <button class="mini-btn" data-act="sess-edit" data-id="${p.id}" data-sid="${s.id}" title="تعديل">✏️</button>
-            <button class="mini-btn del" data-act="sess-del" data-id="${p.id}" data-sid="${s.id}" title="حذف">🗑️</button>
+            <button class="mini-btn ${s.completed ? 'on' : ''}" data-act="sess-toggle" data-id="${p.id}" data-sid="${s.id}" title="${s.completed ? 'مكتملة' : 'تعليم كمكتملة'}">${s.completed ? ICO.checkCircle : ICO.circle}</button>
+            <button class="mini-btn" data-act="sess-edit" data-id="${p.id}" data-sid="${s.id}" title="تعديل">${ICO.edit}</button>
+            <button class="mini-btn del" data-act="sess-del" data-id="${p.id}" data-sid="${s.id}" title="حذف">${ICO.trash}</button>
           </span>
         </div>
-        ${s.treatment ? `<div class="sess-treat">🦷 ${escapeHtml(s.treatment)}</div>` : ''}
-        ${s.notes ? `<div class="sess-note">📝 ${escapeHtml(s.notes)}</div>` : ''}
+        ${s.treatment ? `<div class="sess-treat">${ICO.tooth} ${escapeHtml(s.treatment)}</div>` : ''}
+        ${s.notes ? `<div class="sess-note">${ICO.note} ${escapeHtml(s.notes)}</div>` : ''}
         <div class="sess-foot">
-          <span class="sess-paid">💵 مدفوع: <b>${fmt(toNum(s.paid))}</b></span>
-          ${s.next ? `<span class="sess-next">🗓️ القادم: ${escapeHtml(fmtDateTime(s.next))} • ${escapeHtml(weekday(s.next))}</span>` : ''}
+          <span class="sess-paid">${ICO.wallet} مدفوع: <b>${fmt(toNum(s.paid))}</b></span>
+          ${s.next ? `<span class="sess-next">${ICO.calendar} القادم: ${escapeHtml(fmtDateTime(s.next))} • ${escapeHtml(weekday(s.next))}</span>` : ''}
         </div>
       </div>`;
     }).join('') : '<div class="sub-empty">لا توجد جلسات بعد. اضغط «إضافة جلسة».</div>';
 
-    return `<div class="file-section">
-      <div class="fs-head"><span class="fs-ico">🦷</span><h3>جلسات العلاج</h3>
-        ${p.completed ? '' : `<button class="card-btn open" data-act="sess-add" data-id="${p.id}">➕ إضافة جلسة</button>`}</div>
+    return `<div class="file-section" id="fsSessions">
+      <div class="fs-head"><span class="fs-ico">${ICO.tooth}</span><h3>جلسات العلاج</h3>
+        ${p.completed ? '' : `<button class="card-btn open" data-act="sess-add" data-id="${p.id}">${ICO.plus} إضافة جلسة</button>`}</div>
       <div class="fs-body">${body}</div>
     </div>`;
   }
@@ -743,8 +820,8 @@
         ${r.notes ? `<div class="pay-trow-notes">${escapeHtml(r.notes)}</div>` : ''}
       </div>`).join('')}</div>` : '<div class="sub-empty">لا توجد دفعات مسجّلة بعد. تُسجَّل الدفعات تلقائياً عند إضافة المبلغ المدفوع في الجلسة.</div>';
 
-    return `<div class="file-section">
-      <div class="fs-head"><span class="fs-ico">💳</span><h3>سجل الدفعات</h3><span class="fs-badge">${fmt(tt.paid)}</span></div>
+    return `<div class="file-section" id="fsPayments">
+      <div class="fs-head"><span class="fs-ico">${ICO.wallet}</span><h3>سجل الدفعات</h3><span class="fs-badge">${fmt(tt.paid)}</span></div>
       <div class="fs-body">${summary}${body}</div>
     </div>`;
   }
@@ -757,21 +834,32 @@
       const isPdf = (a.type || '') === 'application/pdf' || /\.pdf$/i.test(a.name || '');
       const thumb = isImg
         ? `<button type="button" class="att-thumb" data-act="att-open" data-id="${p.id}" data-att="${a.id}" title="فتح"><img src="${a.dataUrl}" alt="${escapeHtml(a.name)}" loading="lazy"/></button>`
-        : `<button type="button" class="att-thumb file" data-act="att-open" data-id="${p.id}" data-att="${a.id}" title="فتح"><span>${isPdf ? '📄' : '📎'}</span></button>`;
+        : `<button type="button" class="att-thumb file" data-act="att-open" data-id="${p.id}" data-att="${a.id}" title="فتح"><span>${isPdf ? ICO.filePdf : ICO.fileGeneric}</span></button>`;
       return `<div class="att-card">
         ${thumb}
         <div class="att-name" title="${escapeHtml(a.name)}">${escapeHtml(a.name)}</div>
-        <button class="mini-btn del" data-act="att-del" data-id="${p.id}" data-att="${a.id}" title="حذف">🗑️</button>
+        <button class="mini-btn del" data-act="att-del" data-id="${p.id}" data-att="${a.id}" title="حذف">${ICO.trash}</button>
       </div>`;
     }).join('')}</div>` : '<div class="sub-empty">لا توجد مرفقات بعد. أضف صورة أشعة أو صورة أسنان أو مستنداً.</div>';
 
-    return `<div class="file-section">
-      <div class="fs-head"><span class="fs-ico">📎</span><h3>المرفقات</h3>
-        <button class="card-btn open" data-act="att-add" data-id="${p.id}">➕ إضافة مرفق</button></div>
+    return `<div class="file-section" id="fsAttachments">
+      <div class="fs-head"><span class="fs-ico">${ICO.paperclip}</span><h3>المرفقات</h3>
+        <button class="card-btn open" data-act="att-add" data-id="${p.id}">${ICO.plus} إضافة مرفق</button></div>
       <input type="file" id="attInput" data-id="${p.id}" accept="image/*,application/pdf" multiple hidden />
       <div class="fs-body">${body}</div>
     </div>`;
   }
+
+  /* ---------- ملاحظات المريض (قسم مستقل — نفس الحقل p.notes، عرض فقط) ---------- */
+  function notesSection(p) {
+    if (!p.notes) return '';
+    return `<div class="file-section" id="fsNotes">
+      <div class="fs-head plain"><span class="fs-ico">${ICO.note}</span><h3>ملاحظات</h3></div>
+      <div class="fs-body"><div class="notes-card"><p class="notes-text">${escapeHtml(p.notes)}</p></div></div>
+    </div>`;
+  }
+
+
 
   function triggerAttach(pid) { const inp = $('attInput'); if (inp) { inp.dataset.id = pid; inp.click(); } }
   function readFileAsDataURL(file) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); }); }
@@ -1699,6 +1787,43 @@
   }
 
   /* ============================================================
+     القائمة الجانبية (Side Drawer) — طبقة واجهة فقط
+     ============================================================ */
+  function initDrawer() {
+    const btn = $('menuBtn'), ov = $('drawerOverlay'), dr = $('sideDrawer'), closeBtn = $('drawerClose');
+    if (!btn || !ov || !dr) return;
+    let closing = null;
+    function markActiveLink() { // بصري فقط: تمييز عنصر الدرج المطابق للمسار الحالي
+      var route = document.body.dataset.route || 'dashboard';
+      if (route === 'completed' || route === 'late' || route === 'file') route = 'patients';
+      dr.querySelectorAll('.drawer-link').forEach(function (l) { l.classList.toggle('active', l.dataset.go === route); });
+    }
+    function openDrawer() {
+      markActiveLink();
+      if (closing) { clearTimeout(closing); closing = null; }
+      const dn = $('drawerDocName');
+      if (dn && els.docLabel) dn.textContent = els.docLabel.textContent; // نفس بيانات الطبيب المعروضة — بدون منطق جديد
+      ov.hidden = false;
+      requestAnimationFrame(() => { ov.classList.add('show'); dr.classList.add('open'); });
+      dr.setAttribute('aria-hidden', 'false');
+      btn.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('drawer-lock'); // منع تمرير الخلفية
+    }
+    function closeDrawer() {
+      ov.classList.remove('show'); dr.classList.remove('open');
+      dr.setAttribute('aria-hidden', 'true');
+      btn.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('drawer-lock');
+      closing = setTimeout(() => { ov.hidden = true; closing = null; }, 260);
+    }
+    btn.addEventListener('click', openDrawer);
+    ov.addEventListener('click', closeDrawer);           // إغلاق بالنقر خارجها
+    if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && dr.classList.contains('open')) closeDrawer(); });
+    dr.querySelectorAll('.drawer-link').forEach(l => l.addEventListener('click', () => { closeDrawer(); go(l.dataset.go); }));
+  }
+
+  /* ============================================================
      ربط الأحداث
      ============================================================ */
   function bindEvents() {
@@ -1711,6 +1836,7 @@
 
     document.querySelectorAll('.dash-card').forEach(card => card.addEventListener('click', () => go(card.dataset.go)));
     document.querySelectorAll('.home-tab-btn').forEach(btn => btn.addEventListener('click', () => go(btn.dataset.go)));
+    initDrawer(); // القائمة الجانبية — واجهة فقط، تستخدم go() الحالي دون أي منطق جديد للبيانات
     if (els.trialBanner) els.trialBanner.addEventListener('click', () => go('support'));
     els.backBtn.addEventListener('click', goBack);
 
@@ -1761,6 +1887,13 @@
     wireChipGroup(els.pedBehaviorChips, els.pedBehavior);
 
     els.search.addEventListener('input', debounce(renderPatients, 120));
+    if (els.patientsFilterBar) {
+      els.patientsFilterBar.addEventListener('click', (e) => {
+        const chip = e.target.closest('.filter-chip'); if (!chip) return;
+        patientsFilter = chip.dataset.filter || 'all';
+        renderPatients();
+      });
+    }
 
     // الجلسة
     els.sessionForm.addEventListener('submit', handleSessionSubmit);
