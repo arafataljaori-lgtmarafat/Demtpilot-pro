@@ -893,7 +893,7 @@ body[data-route="dashboard"] .wrap{ padding-top:16px; padding-inline:18px; }
 }
 #view-dashboard .htb-text small{ font-size:.63rem; color:rgba(190,232,244,.85); font-weight:600; }
 
-/* ---------- السن داخل الـHero: جزء من التصميم، لا صورة ملصقة ---------- */
+/* ---------- كرسي الأسنان داخل الـHero: أصل ثلاثي الأبعاد مدمج ---------- */
 #view-dashboard .dash-hero-tooth{
   position:relative; z-index:1; flex:0 0 42%; min-width:0;
   display:flex; align-items:center; justify-content:flex-start;
@@ -903,6 +903,25 @@ body[data-route="dashboard"] .wrap{ padding-top:16px; padding-inline:18px; }
   width:112%; height:auto; max-width:176px; display:block;
   margin-block:-6px;
   filter:drop-shadow(0 8px 14px rgba(2,12,26,.28));
+}
+#view-dashboard .dash-hero-chair{
+  align-items:center; justify-content:flex-end;
+  padding:0 0 0 2px; isolation:isolate;
+}
+#view-dashboard .dash-chair-light{
+  position:absolute; z-index:1; pointer-events:none;
+  top:12%; left:-6%; width:106%; height:74%;
+  opacity:.68; mix-blend-mode:screen;
+  clip-path:polygon(43% 0, 58% 0, 100% 100%, 0 100%);
+  background:radial-gradient(ellipse at 50% 5%, rgba(250,254,255,.72) 0%, rgba(177,231,249,.28) 28%, rgba(49,165,214,.08) 52%, rgba(49,165,214,0) 76%);
+  filter:blur(3px);
+}
+#view-dashboard .dash-chair-img{
+  position:relative; z-index:2; display:block;
+  width:112%; max-width:160px; height:136px;
+  object-fit:contain; object-position:center;
+  transform:translate(-1px, 3px);
+  filter:drop-shadow(0 9px 12px rgba(1,12,30,.38)) drop-shadow(0 2px 5px rgba(141,219,248,.20));
 }
 
 /* ============================================================
@@ -1204,6 +1223,7 @@ html[dir="ltr"] .side-drawer{ transform:translateX(-100%); }
   #view-dashboard .dash-hero-meta{ font-size:.78rem; }
   #view-dashboard .dash-hero-content{ padding:0 14px 0 2px; }
   #view-dashboard .dash-hero-tooth svg{ max-width:158px; }
+  #view-dashboard .dash-chair-img{ max-width:150px; height:128px; }
   #view-dashboard .stat-card .dash-count{ font-size:1.32rem; }
   #view-dashboard .dash-quick-surface{ margin-bottom:22px; }
 }
@@ -1212,6 +1232,7 @@ html[dir="ltr"] .side-drawer{ transform:translateX(-100%); }
   #view-dashboard .dash-hero-content{ flex:1 1 58%; padding:0 12px 0 2px; }
   #view-dashboard .dash-hero-tooth{ flex:0 0 40%; padding:2px 4px 2px 0; margin-inline-start:-6px; }
   #view-dashboard .dash-hero-tooth svg{ max-width:142px; }
+  #view-dashboard .dash-chair-img{ max-width:136px; height:120px; }
   #view-dashboard .dash-hero-title{ font-size:1rem; }
   #view-dashboard .dash-hero-badge{ font-size:.63rem; padding:3px 10px; }
   #view-dashboard .hero-trial-badge{ inset-inline-end:10px; bottom:9px; padding:6px 10px; gap:6px; }
@@ -1234,6 +1255,7 @@ html[dir="ltr"] .side-drawer{ transform:translateX(-100%); }
   #view-dashboard .dash-hero-content{ flex-basis:59%; padding-top:0; }
   #view-dashboard .dash-hero-tooth{ flex-basis:39%; }
   #view-dashboard .dash-hero-tooth svg{ max-width:126px; }
+  #view-dashboard .dash-chair-img{ max-width:122px; height:114px; }
   #view-dashboard .dash-hero-title{ font-size:.94rem; }
   #view-dashboard .dash-hero-meta{ font-size:.72rem; }
   #view-dashboard .hero-trial-badge{ inset-inline-end:8px; bottom:8px; }

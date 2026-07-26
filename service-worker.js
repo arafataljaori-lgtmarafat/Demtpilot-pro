@@ -1,10 +1,11 @@
 /* ============================================================
    DentPilot Pro — Service Worker (تحديث آمن مُتحكَّم به)
    ============================================================ */
-const CACHE = 'dentpilot-v2.5.1';
+const CACHE = 'dentpilot-v2.5.2';
 const ASSETS = [
   './', 'index.html', 'style.css', 'script.js', 'activation.js', 'manifest.json', 'version.json',
-  'icon-192.png', 'icon-512.png', 'icon-512-maskable.png', 'apple-touch-icon.png', 'favicon.ico', 'favicon-32.png'
+  'icon-192.png', 'icon-512.png', 'icon-512-maskable.png', 'apple-touch-icon.png', 'favicon.ico', 'favicon-32.png',
+  'dental-chair-navy.png'
 ];
 
 // التثبيت: تخزين مسبق فقط — بلا skipWaiting تلقائي (ينتظر موافقة المستخدم)
