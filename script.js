@@ -19,12 +19,45 @@
      ============================================================ */
   const PRO_SUPPORT_CONFIG = {
     developer: 'د. عرفات الجعوري',
+
+    // ---- بيانات الدعم الرسمي (تُعرض في البطاقة — بلا أي رقم هاتف ظاهر للمستخدم) ----
+    official: {
+      badge: 'الدعم الرسمي',
+      name: 'د. عرفات الجعوري',
+      fullName: 'د. عرفات علي الجعوري',
+      role: 'مطور DentPilot Pro والمشرف على الدعم والتفعيل',
+      description: 'للتفعيل، الدعم الفني، والاستفسارات المتعلقة بالتطبيق.'
+    },
+
+    // ---- الوكيل المعتمد (كائن مستقل — لا يُعرض رقمه في الواجهة إطلاقاً) ----
+    agent: {
+      title: 'وكيل DentPilot المعتمد في محافظة إب',
+      name: 'د. فراس المجمر',
+      description: 'يمكنكم التواصل معه للحصول على كود التفعيل أو لأي استفسار متعلق بالتطبيق.'
+    },
+    // رقم واتساب الوكيل بصيغة دولية دون علامة + — يُستخدم فقط داخل رابط wa.me، لا يُطبع كنص أبداً.
+    agentWhatsApp: '967771697735',
+
+    // (قديم) سعر نسخة العيادات المفرد — لم يعد يُعرض بعد اعتماد نظام الخطط الأربع. مُبقى للتوافق فقط.
     price: { amount: '7000', currency: 'ريال', label: 'سعر تفعيل نسخة العيادات' },
+
+    // ---- الخطط الأربع المعتمدة: المصدر الوحيد للأسعار (معرّفات ثابتة لربط لوحة تحكم مستقبلية) ----
     plans: [
-      { key: 'monthly',  title: 'شهري',      note: '' },
-      { key: 'yearly',   title: 'سنوي',      note: 'سنة واحدة' },
-      { key: 'lifetime', title: 'مدى الحياة', note: '' }
+      { key: 'monthly',    title: 'شهر واحد', usd: '2$',  yer: '1000 ريال يمني',  duration: 'اشتراك لمدة شهر واحد',  badge: '' },
+      { key: 'six_months', title: 'ستة أشهر', usd: '5$',  yer: '2500 ريال يمني',  duration: 'اشتراك لمدة ستة أشهر',  badge: '' },
+      { key: 'annual',     title: 'سنوي',     usd: '20$', yer: '10000 ريال يمني', duration: 'اشتراك لمدة سنة كاملة', badge: 'الأكثر اختياراً' },
+      { key: 'lifetime',   title: 'دائم',     usd: '50$', yer: '25000 ريال يمني', duration: 'ترخيص دائم بلا تجديد',  badge: 'دفع مرة واحدة' }
     ],
+    defaultPlan: 'six_months',
+
+    // ---- ملاحظات/أسئلة (محتوى مبني على سلوك التطبيق الفعلي فقط) ----
+    notes: [
+      { q: 'هل يعمل كود التفعيل على أكثر من جهاز؟', a: 'لا. الكود مُولَّد من معرّف هذا الجهاز تحديداً، ولكل جهاز كود خاص به.' },
+      { q: 'هل تتأثر بيانات المرضى عند التفعيل؟', a: 'لا. جميع بيانات المرضى والجلسات والمدفوعات والمرفقات تبقى كما هي محفوظة محلياً على الجهاز.' },
+      { q: 'ماذا أفعل عند تغيير الهاتف؟', a: 'سيتغيّر معرّف الجهاز ويلزم كود جديد. خذ نسخة احتياطية من صفحة «النسخة الاحتياطية» قبل التغيير، ثم أرسل المعرّف الجديد للدعم.' },
+      { q: 'كم مدة الفترة التجريبية؟', a: 'الفترة التجريبية المجانية 72 ساعة (3 أيام) تبدأ من أول تشغيل للتطبيق على الجهاز.' }
+    ],
+
     payInstructions: [
       'اختر خطة التفعيل المناسبة.',
       'ادفع عبر إحدى طرق الدفع التالية.',
@@ -41,8 +74,34 @@
       { display: '775101518', wa: '967775101518' },
       { display: '779449744', wa: '967779449744' }
     ],
+
+    // ---- نصوص/تسميات الواجهة (مركزية بالكامل تمهيداً للربط بلوحة تحكم مستقبلية) ----
+    texts: {
+      selectedPlanLabel: 'الخطة',
+      deviceLinkNote: 'كود التفعيل مرتبط بمعرّف هذا الجهاز تحديداً.',
+      sectionPayment: 'طرق الدفع',
+      sectionSteps: 'خطوات الحصول على كود التفعيل',
+      sectionNotes: 'أسئلة وملاحظات مهمة',
+      statusActivated: { title: 'التطبيق مفعّل', desc: 'جميع الوظائف متاحة بالكامل على هذا الجهاز.' },
+      statusTrial: { title: 'الفترة التجريبية نشطة', descTpl: 'المتبقي: {{remaining}} — يمكنك التفعيل في أي وقت.' },
+      statusExpired: { title: 'انتهت الفترة التجريبية', desc: 'يلزم إدخال كود تفعيل لمتابعة استخدام التطبيق.' }
+    },
+    labels: {
+      requestActivation: 'طلب كود التفعيل',
+      haveCode: 'لدي كود تفعيل',
+      officialRequestActivation: 'طلب كود التفعيل عبر واتساب',
+      officialContactSupport: 'التواصل مع الدعم الفني',
+      agentContact: 'التواصل مع الوكيل عبر واتساب'
+    },
+    // ---- قوالب رسائل واتساب (نص خام بمتغيّرات {{...}} — تُملأ ديناميكياً، جاهزة للتعديل من لوحة تحكم لاحقاً) ----
+    messageTemplates: {
+      activationRequest: 'مرحباً د. عرفات،\nأرغب في تفعيل تطبيق DentPilot Pro.\n\nالخطة المختارة: {{planTitle}}\nالسعر: {{usd}} – {{yer}}\nمعرّف الجهاز: {{deviceId}}\n\nأرجو مراجعة البيانات وإرسال كود التفعيل، وشكراً.',
+      supportHelp: 'مرحباً د. عرفات،\nأحتاج إلى مساعدة فنية بخصوص تطبيق DentPilot Pro.\n\nمعرّف الجهاز: {{deviceId}}',
+      agentRequest: 'مرحباً د. فراس،\nأرغب في الحصول على كود تفعيل تطبيق DentPilot Pro.\n\nالخطة المختارة: {{planTitle}}\nالسعر: {{usd}} – {{yer}}\nمعرّف الجهاز: {{deviceId}}\n\nأرجو مراجعة البيانات وإرسال كود التفعيل، وشكراً.'
+    },
+
     // مفتاح قراءة اختياري (للقراءة فقط) قد تكتبه لوحة تحكم مستقبلية:
-    // { plan:'monthly|yearly|lifetime', activatedAt:ISO, expiresAt:ISO }
+    // { plan:'monthly|six_months|annual|lifetime', activatedAt:ISO, expiresAt:ISO }
     // لا يُنشأ ولا يُكتب من هنا إطلاقاً — يُقرأ فقط إن وُجد.
     metaKey: 'dentpilot_license_meta'
   };
@@ -525,46 +584,114 @@
   }
 
   /* ============================================================
-     الدعم والتفعيل (نسخة العيادات Pro)
-     - تُبنى من PRO_SUPPORT_CONFIG (بيانات عرض قابلة للتعديل لاحقاً)
-     - تقرأ حالة التفعيل من DPLicense دون تغيير منطقه
+     الدعم والتفعيل — Mobile Premium
+     - تُبنى بالكامل من PRO_SUPPORT_CONFIG (بيانات مركزية، دون أي تكرار داخل HTML)
+     - تقرأ حالة التفعيل والتجربة من window.DPLicense دون أي تغيير في منطقه
      ============================================================ */
-  function licenseMeta() {
-    // قراءة فقط: تفاصيل الاشتراك إن كتبتها لوحة تحكم مستقبلية. غير موجودة الآن = null
-    try {
-      const r = localStorage.getItem(PRO_SUPPORT_CONFIG.metaKey);
-      if (!r) return null;
-      const o = JSON.parse(r);
-      return (o && typeof o === 'object') ? o : null;
-    } catch (e) { return null; }
-  }
-  function planTitle(key) {
-    const p = PRO_SUPPORT_CONFIG.plans.find(x => x.key === key);
-    return p ? p.title : (key || '—');
-  }
+  let selectedSupportPlan = PRO_SUPPORT_CONFIG.defaultPlan;
+
   function copyBtn(value, label) {
-    return `<button type="button" class="btn btn-ghost sup-copy" data-act="copy" data-copy="${escapeHtml(value)}">${label || 'نسخ الرقم'}</button>`;
+    return `<button type="button" class="btn btn-ghost sup-copy" data-act="copy" data-copy="${escapeHtml(value)}">${label || 'نسخ'}</button>`;
   }
-  function supPlansHtml() {
-    return `<div class="sup-plans">${PRO_SUPPORT_CONFIG.plans.map(pl =>
-      `<div class="sup-plan"><span class="sup-plan-title">${escapeHtml(pl.title)}</span>${pl.note ? `<span class="sup-plan-note">${escapeHtml(pl.note)}</span>` : ''}</div>`
-    ).join('')}</div>`;
+  function planByKey(key) {
+    return PRO_SUPPORT_CONFIG.plans.find(p => p.key === key) || PRO_SUPPORT_CONFIG.plans[0];
   }
-  function supWhatsappHtml() {
-    return `<div class="sup-wa">${PRO_SUPPORT_CONFIG.whatsapp.map(w =>
-      `<a class="card-btn wa" href="https://wa.me/${escapeHtml(w.wa)}" target="_blank" rel="noopener">💬 واتساب ${escapeHtml(w.display)}</a>`
-    ).join('')}</div>`;
+  function deviceIdSafe() {
+    try { return (window.DPLicense && window.DPLicense.getDeviceId) ? window.DPLicense.getDeviceId() : '—'; }
+    catch (e) { return '—'; }
   }
-  function supDeviceCardHtml() {
-    let dev = '';
-    try { dev = (window.DPLicense && window.DPLicense.getDeviceId) ? window.DPLicense.getDeviceId() : ''; } catch (e) { dev = ''; }
-    if (!dev) return '';   // لا نعرض بطاقة فارغة
-    return `<div class="sup-card">
-      <div class="sup-card-head"><span>🔑</span><h3>رمز التطبيق الخاص بهذا الجهاز</h3></div>
-      <div class="sup-code">${escapeHtml(dev)}</div>
-      ${copyBtn(dev, 'نسخ رمز التطبيق')}
+  function officialWaNumber() {
+    const list = PRO_SUPPORT_CONFIG.whatsapp;
+    return (list && list[0] && list[0].wa) ? list[0].wa : '';
+  }
+  function supWaHref(number, message) { return 'https://wa.me/' + number + '?text=' + encodeURIComponent(message); }
+
+  // ---- تعبئة قوالب النصوص {{token}} من PRO_SUPPORT_CONFIG بقيم حقيقية فقط ----
+  function fillTemplate(tpl, ctx) {
+    return String(tpl || '').replace(/\{\{(\w+)\}\}/g, (m, key) => (ctx[key] != null ? String(ctx[key]) : ''));
+  }
+  function planMessageContext(plan) {
+    return { planTitle: plan.title, usd: plan.usd, yer: plan.yer, deviceId: deviceIdSafe() };
+  }
+
+  // ---- رسائل واتساب الجاهزة (تُبنى من PRO_SUPPORT_CONFIG.messageTemplates + الخطة المختارة فعلياً + معرّف الجهاز الحقيقي) ----
+  function activationRequestMessage(plan) {
+    return fillTemplate(PRO_SUPPORT_CONFIG.messageTemplates.activationRequest, planMessageContext(plan));
+  }
+  function supportHelpMessage() {
+    return fillTemplate(PRO_SUPPORT_CONFIG.messageTemplates.supportHelp, { deviceId: deviceIdSafe() });
+  }
+  function agentRequestMessage(plan) {
+    return fillTemplate(PRO_SUPPORT_CONFIG.messageTemplates.agentRequest, planMessageContext(plan));
+  }
+  function openActivationRequest() {
+    const num = officialWaNumber(); if (!num) return;
+    window.open(supWaHref(num, activationRequestMessage(planByKey(selectedSupportPlan))), '_blank', 'noopener');
+  }
+  function openSupportHelp() {
+    const num = officialWaNumber(); if (!num) return;
+    window.open(supWaHref(num, supportHelpMessage()), '_blank', 'noopener');
+  }
+  function openAgentRequest() {
+    const num = PRO_SUPPORT_CONFIG.agentWhatsApp; if (!num) return;
+    window.open(supWaHref(num, agentRequestMessage(planByKey(selectedSupportPlan))), '_blank', 'noopener');
+  }
+
+  // ---- كرت حالة التطبيق (ديناميكي بالكامل من window.DPLicense + نصوص PRO_SUPPORT_CONFIG.texts) ----
+  function supStatusCardHtml(state) {
+    const t = PRO_SUPPORT_CONFIG.texts;
+    if (state === 'activated') {
+      return `<div class="sup2-status ok">
+        <span class="sup2-status-ico" aria-hidden="true">${ICO.checkCircle}</span>
+        <div class="sup2-status-txt"><h3>${escapeHtml(t.statusActivated.title)}</h3><p>${escapeHtml(t.statusActivated.desc)}</p></div>
+      </div>`;
+    }
+    if (state === 'trial') {
+      let h = 0; try { h = window.DPLicense ? window.DPLicense.trialRemainingHours() : 0; } catch (e) {}
+      const remTxt = h >= 24 ? Math.ceil(h / 24) + ' يوم' : h + ' ساعة';
+      const desc = fillTemplate(t.statusTrial.descTpl, { remaining: remTxt });
+      return `<div class="sup2-status trial">
+        <span class="sup2-status-ico" aria-hidden="true">${ICO.clock}</span>
+        <div class="sup2-status-txt"><h3>${escapeHtml(t.statusTrial.title)}</h3><p>${escapeHtml(desc)}</p></div>
+      </div>`;
+    }
+    return `<div class="sup2-status expired">
+      <span class="sup2-status-ico" aria-hidden="true">${ICO.warn}</span>
+      <div class="sup2-status-txt"><h3>${escapeHtml(t.statusExpired.title)}</h3><p>${escapeHtml(t.statusExpired.desc)}</p></div>
     </div>`;
   }
+
+  // ---- شبكة الخطط الأربع (عمودان) ----
+  function supPlansGridHtml() {
+    return `<div class="sup2-plans">${PRO_SUPPORT_CONFIG.plans.map(p => `
+      <button type="button" class="sup2-plan${p.key === selectedSupportPlan ? ' active' : ''}" data-act="select-plan" data-plan="${p.key}" aria-pressed="${p.key === selectedSupportPlan}">
+        ${p.badge ? `<span class="sup2-plan-badge">${escapeHtml(p.badge)}</span>` : ''}
+        <span class="sup2-plan-title">${escapeHtml(p.title)}</span>
+        <span class="sup2-plan-usd">${escapeHtml(p.usd)}</span>
+        <span class="sup2-plan-yer">${escapeHtml(p.yer)}</span>
+      </button>`).join('')}</div>`;
+  }
+
+  // ---- كرت الخطة المختارة (يتحدّث فوراً دون إعادة تحميل) ----
+  function supSelectedPlanCardHtml() {
+    const p = planByKey(selectedSupportPlan);
+    const t = PRO_SUPPORT_CONFIG.texts, l = PRO_SUPPORT_CONFIG.labels;
+    return `<div class="sup2-selected">
+      <span class="sup2-selected-label">${escapeHtml(t.selectedPlanLabel)}</span>
+      <div class="sup2-selected-row">
+        <b class="sup2-selected-name">${escapeHtml(p.title)}</b>
+        <span class="sup2-selected-price">${escapeHtml(p.usd)} <small>${escapeHtml(p.yer)}</small></span>
+      </div>
+      <span class="sup2-selected-dur">${escapeHtml(p.duration)}</span>
+      <p class="sup2-selected-note">${ICO.warn} ${escapeHtml(t.deviceLinkNote)}</p>
+      <div class="sup2-selected-actions">
+        <button type="button" class="btn btn-primary sup2-cta" data-act="request-activation">${escapeHtml(l.requestActivation)}</button>
+        <button type="button" class="btn btn-ghost sup2-cta-sec" data-act="open-activation">${escapeHtml(l.haveCode)}</button>
+      </div>
+    </div>`;
+  }
+
+  // ---- طرق الدفع (من PRO_SUPPORT_CONFIG.payMethods كما هي دون أي اختراع) ----
   function supPayMethodsHtml() {
     const k = PRO_SUPPORT_CONFIG.payMethods.alkuraimi, j = PRO_SUPPORT_CONFIG.payMethods.jeeb;
     const method = (m) => `<div class="sup-pay">
@@ -577,92 +704,69 @@
     return `<div class="sup-pays">${method(k)}${method(j)}</div>`;
   }
 
-  function renderSupport() {
-    const body = $('supportBody'); if (!body) return;
-    const cfg = PRO_SUPPORT_CONFIG;
-    let activated = false, state = 'activated';
-    try {
-      if (window.DPLicense) {
-        activated = !!window.DPLicense.isActivated();
-        state = window.DPLicense.getAccessState();
-      }
-    } catch (e) {}
-
-    if (activated) {
-      // ===== بعد التفعيل: تفاصيل التفعيل + دعم فقط (بلا سعر/دفع) =====
-      const meta = licenseMeta();
-      let details = '';
-      if (meta) {
-        const rows = [];
-        if (meta.plan) rows.push(['نوع الاشتراك', planTitle(meta.plan)]);
-        if (meta.activatedAt) rows.push(['تاريخ التفعيل', fmtDate(meta.activatedAt)]);
-        if (meta.plan === 'lifetime') rows.push(['تاريخ الانتهاء', 'لا يوجد تاريخ انتهاء']);
-        else if (meta.expiresAt) rows.push(['تاريخ الانتهاء', fmtDate(meta.expiresAt)]);
-        if (rows.length) {
-          details = `<div class="sup-details">${rows.map(r =>
-            `<div class="sup-pay-row"><span>${escapeHtml(r[0])}</span><b>${escapeHtml(r[1])}</b></div>`
-          ).join('')}</div>`;
-        }
-      }
-      body.innerHTML = `
-        <div class="sup-active">
-          <div class="sup-active-ico">✅</div>
-          <div class="sup-active-main">
-            <h3>التطبيق مفعل بنجاح</h3>
-            <p>تم تطوير التطبيق بواسطة: ${escapeHtml(cfg.developer)}</p>
-          </div>
-        </div>
-        ${details}
-        ${supDeviceCardHtml()}
-        <div class="sup-card">
-          <div class="sup-card-head"><span>💬</span><h3>الدعم الرسمي</h3></div>
-          ${supWhatsappHtml()}
-        </div>`;
-      return;
-    }
-
-    // ===== غير مفعّل / فترة تجريبية =====
-    let trialCard = '';
-    try {
-      if (state === 'trial' && window.DPLicense) {
-        const h = window.DPLicense.trialRemainingHours();
-        trialCard = `<div class="sup-trial">⏳ الفترة التجريبية المجانية سارية — المتبقي: ${h} ساعة.</div>`;
-      } else if (state === 'expired') {
-        trialCard = `<div class="sup-trial expired">⛔ انتهت الفترة التجريبية المجانية. فعّل التطبيق للاستمرار.</div>`;
-      }
-    } catch (e) {}
-
-    body.innerHTML = `
-      ${trialCard}
-      <div class="sup-card sup-cta">
-        <button type="button" class="btn btn-primary" data-act="open-activation" style="width:100%">🔓 تفعيل التطبيق الآن</button>
-      </div>
-
-      <div class="sup-card">
-        <div class="sup-card-head"><span>🛒</span><h3>شراء مرة واحدة أو اشتراك حسب الخطة</h3></div>
-        <div class="sup-price">
-          <span class="sup-price-label">${escapeHtml(cfg.price.label)}</span>
-          <span class="sup-price-val">${escapeHtml(cfg.price.amount)} ${escapeHtml(cfg.price.currency)}</span>
-        </div>
-        ${supPlansHtml()}
-      </div>
-
-      <div class="sup-card">
-        <div class="sup-card-head"><span>🧾</span><h3>تعليمات الدفع</h3></div>
+  // ---- أقسام قابلة للطي (details/summary أصلية — تقلّل ازدحام الصفحة) ----
+  function supCollapsibleSectionsHtml() {
+    const cfg = PRO_SUPPORT_CONFIG, t = cfg.texts;
+    return `
+    <details class="sup2-collapse">
+      <summary>${ICO.money}<span>${escapeHtml(t.sectionPayment)}</span></summary>
+      <div class="sup2-collapse-body">${supPayMethodsHtml()}</div>
+    </details>
+    <details class="sup2-collapse">
+      <summary>${ICO.check}<span>${escapeHtml(t.sectionSteps)}</span></summary>
+      <div class="sup2-collapse-body">
         <ol class="sup-steps">${cfg.payInstructions.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ol>
       </div>
-
-      <div class="sup-card">
-        <div class="sup-card-head"><span>💳</span><h3>طرق الدفع</h3></div>
-        ${supPayMethodsHtml()}
+    </details>
+    <details class="sup2-collapse">
+      <summary>${ICO.note}<span>${escapeHtml(t.sectionNotes)}</span></summary>
+      <div class="sup2-collapse-body">
+        ${cfg.notes.map(n => `<div class="sup2-note"><b>${escapeHtml(n.q)}</b><p>${escapeHtml(n.a)}</p></div>`).join('')}
       </div>
+    </details>`;
+  }
 
-      ${supDeviceCardHtml()}
+  // ---- بطاقة الدعم الرسمي (الأبرز في الصفحة — بلا أي رقم هاتف ظاهر) ----
+  function supOfficialCardHtml() {
+    const o = PRO_SUPPORT_CONFIG.official, l = PRO_SUPPORT_CONFIG.labels;
+    return `<div class="sup2-official">
+      <span class="sup2-official-badge">${escapeHtml(o.badge)}</span>
+      <h3 class="sup2-official-name">${escapeHtml(o.name)}</h3>
+      <p class="sup2-official-full">${escapeHtml(o.fullName)}</p>
+      <p class="sup2-official-role">${escapeHtml(o.role)}</p>
+      <p class="sup2-official-desc">${escapeHtml(o.description)}</p>
+      <div class="sup2-official-actions">
+        <button type="button" class="sup2-official-primary" data-act="request-activation">${escapeHtml(l.officialRequestActivation)}</button>
+        <button type="button" class="sup2-official-secondary" data-act="contact-support">${escapeHtml(l.officialContactSupport)}</button>
+      </div>
+    </div>`;
+  }
 
-      <div class="sup-card">
-        <div class="sup-card-head"><span>💬</span><h3>الدعم الرسمي عبر واتساب</h3></div>
-        ${supWhatsappHtml()}
-      </div>`;
+  // ---- بطاقة الوكيل (أهدأ وأصغر — تُخفى تلقائياً إن لم يُعتمد رقمها) ----
+  function supAgentCardHtml() {
+    if (!PRO_SUPPORT_CONFIG.agentWhatsApp) return '';
+    const ag = PRO_SUPPORT_CONFIG.agent, l = PRO_SUPPORT_CONFIG.labels;
+    return `<div class="sup2-agent">
+      <h4 class="sup2-agent-title">${escapeHtml(ag.title)}</h4>
+      <p class="sup2-agent-name">${escapeHtml(ag.name)}</p>
+      <p class="sup2-agent-desc">${escapeHtml(ag.description)}</p>
+      <button type="button" class="btn btn-ghost sup2-agent-btn" data-act="contact-agent">${escapeHtml(l.agentContact)}</button>
+    </div>`;
+  }
+
+  function renderSupport() {
+    const body = $('supportBody'); if (!body) return;
+    let state = 'activated';
+    try { if (window.DPLicense) state = window.DPLicense.getAccessState(); } catch (e) {}
+
+    body.innerHTML = `
+      ${supStatusCardHtml(state)}
+      ${supPlansGridHtml()}
+      ${supSelectedPlanCardHtml()}
+      ${supCollapsibleSectionsHtml()}
+      ${supOfficialCardHtml()}
+      ${supAgentCardHtml()}
+    `;
   }
 
   /* ============================================================
@@ -996,11 +1100,41 @@
     } catch (e) { toast('تعذّر النسخ — انسخ الرقم يدوياً.'); }
   }
 
+  /* ---------- وضع activationOverlay: إلزامي (بعد انتهاء التجربة) مقابل اختياري (فتح يدوي) ----------
+     هذا تحكّم بصري في الإغلاق فقط — لا علاقة له بمنطق activation.js أو حساب التجربة/الترخيص. ---------- */
+  function setActivationOverlayMode(mandatory) {
+    const ov = $('activationOverlay'); if (!ov) return;
+    ov.dataset.mandatory = mandatory ? 'true' : 'false';
+    const closeBtn = $('actClose'); if (closeBtn) closeBtn.hidden = !!mandatory;
+  }
+
   // فتح شاشة التفعيل الحالية (activation.js) من زر «تفعيل التطبيق الآن» — دون تغيير منطق التفعيل
+  // الفتح اليدوي دائماً غير إلزامي (لا يظهر إلا أثناء تجربة سارية أو بعد التفعيل، لذا يبقى قابلاً للإغلاق)
   function openActivation() {
     const ov = document.getElementById('activationOverlay');
-    if (ov) { ov.hidden = false; const inp = document.getElementById('actCode'); if (inp) setTimeout(function () { inp.focus(); }, 60); }
-    else { toast('شاشة التفعيل غير متاحة.'); }
+    if (ov) {
+      setActivationOverlayMode(false);
+      ov.hidden = false;
+      const inp = document.getElementById('actCode'); if (inp) setTimeout(function () { inp.focus(); }, 60);
+    } else { toast('شاشة التفعيل غير متاحة.'); }
+  }
+
+  // ربط أزرار activationOverlay غير الموجودة داخل #app (الإغلاق + طلب الدعم/الوكيل + منع الإغلاق الإلزامي)
+  function bindActivationOverlayExtras() {
+    const ov = $('activationOverlay'); if (!ov) return;
+    const closeBtn = $('actClose');
+    if (closeBtn) closeBtn.addEventListener('click', function () { if (ov.dataset.mandatory !== 'true') ov.hidden = true; });
+    ov.addEventListener('click', function (e) { if (e.target === ov && ov.dataset.mandatory !== 'true') ov.hidden = true; });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !ov.hidden && ov.dataset.mandatory !== 'true') ov.hidden = true;
+    });
+    const waBtn = $('actWaBtn');
+    if (waBtn) waBtn.addEventListener('click', openActivationRequest);
+    const agentBtn = $('actAgentBtn');
+    if (agentBtn) {
+      agentBtn.hidden = !PRO_SUPPORT_CONFIG.agentWhatsApp;
+      agentBtn.addEventListener('click', openAgentRequest);
+    }
   }
 
   /* ============================================================
@@ -1833,6 +1967,7 @@
     if (els.checkUpdateBtn) els.checkUpdateBtn.addEventListener('click', checkForUpdates);
     els.doctorClose.addEventListener('click', closeDoctor);
     els.doctorCancel.addEventListener('click', closeDoctor);
+    bindActivationOverlayExtras();
 
     document.querySelectorAll('.dash-card').forEach(card => card.addEventListener('click', () => go(card.dataset.go)));
     document.querySelectorAll('.home-tab-btn').forEach(btn => btn.addEventListener('click', () => go(btn.dataset.go)));
@@ -1920,6 +2055,10 @@
       else if (act === 'att-open') openAttachment(id, btn.dataset.att);
       else if (act === 'copy') copyText(btn.dataset.copy);
       else if (act === 'open-activation') openActivation();
+      else if (act === 'select-plan') { selectedSupportPlan = btn.dataset.plan; renderSupport(); }
+      else if (act === 'request-activation') openActivationRequest();
+      else if (act === 'contact-support') openSupportHelp();
+      else if (act === 'contact-agent') openAgentRequest();
     });
 
     // مدخل المرفقات يُعاد إنشاؤه مع كل عرض — تفويض حدث التغيير
@@ -2047,10 +2186,15 @@
     var _needDoctor = function () { if (!settings.doctorName) openDoctor(false); };
     var _state = window.DPLicense ? window.DPLicense.getAccessState() : 'activated';
     if (_state !== 'expired') _needDoctor();
+    // وضع الإغلاق لـ activationOverlay: إلزامي (بلا إغلاق) فقط إذا كانت التجربة منتهية فعلياً عند بدء التشغيل
+    setActivationOverlayMode(_state === 'expired');
     if (window.DPLicense) window.DPLicense.onActivated = function () {
       if (els.trialBanner) els.trialBanner.hidden = true;   // إخفاء الشريط بعد التفعيل
+      setActivationOverlayMode(false);                      // فتح لاحق لنفس النافذة يصبح اختيارياً
       _needDoctor();
       if (els.doctorOverlay && !els.doctorOverlay.hidden) updateSettingsStatus();
+      if (currentView === 'support') renderSupport();        // تحديث كرت الحالة فوراً دون إعادة تحميل
+      toast('تم تفعيل التطبيق بنجاح');
     };
     updateTrialBanner();
     setInterval(updateTrialBanner, 60000);

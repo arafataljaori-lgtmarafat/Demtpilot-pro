@@ -1765,3 +1765,230 @@ html[dir="ltr"] .side-drawer{ transform:translateX(-100%); }
   .filter-chip{ padding:7px 12px; font-size:.78rem; }
   .file-quicknav a{ padding:7px 11px; }
 }
+
+/* ============================================================
+   الدعم والتفعيل — Mobile Premium (إعادة تصميم كاملة)
+   كحلي · تركوازي · أبيض — بلا Emoji كبيرة، أيقونات SVG فقط
+   ============================================================ */
+
+/* ---------- رأس الصفحة ---------- */
+.sup2-head{
+  display:flex; align-items:flex-start; gap:12px;
+  margin-bottom:18px;
+}
+.sup2-head-ico{
+  flex:none; width:42px; height:42px; border-radius:var(--dp-r-md);
+  display:grid; place-items:center;
+  background:var(--dp-grad-hero); color:#fff;
+  box-shadow:var(--dp-shadow-card);
+}
+.sup2-head-txt h2{
+  font-family:'Cairo',sans-serif; font-size:1.2rem; color:var(--dp-navy); margin:0 0 4px;
+}
+.sup2-head-txt p{ margin:0; font-size:.86rem; color:var(--muted); }
+
+/* حاوية القسم — مسافة سفلية كافية حتى لا يُغطّى المحتوى (احتياطاً، بصرف النظر عن مسار العرض) */
+.sup2{ padding-bottom:calc(90px + env(safe-area-inset-bottom)); }
+
+/* ---------- كرت حالة التطبيق ---------- */
+.sup2-status{
+  display:flex; align-items:center; gap:13px;
+  border-radius:var(--dp-r-lg); padding:16px 16px;
+  margin-bottom:16px; box-shadow:var(--dp-shadow-card);
+  border:1px solid var(--dp-line);
+}
+.sup2-status-ico{
+  flex:none; width:44px; height:44px; border-radius:14px;
+  display:grid; place-items:center; background:#fff;
+}
+.sup2-status-ico svg{ width:20px; height:20px; }
+.sup2-status-txt h3{ font-family:'Cairo',sans-serif; font-size:1rem; margin:0 0 3px; }
+.sup2-status-txt p{ margin:0; font-size:.84rem; line-height:1.5; }
+
+.sup2-status.ok{ background:linear-gradient(120deg,#e7f7ef,#d9f1e3); border-color:#bfe6d2; }
+.sup2-status.ok .sup2-status-ico{ color:#1e8a5a; }
+.sup2-status.ok .sup2-status-txt h3{ color:#166b45; }
+.sup2-status.ok .sup2-status-txt p{ color:#1f7d4f; }
+
+.sup2-status.trial{ background:linear-gradient(120deg, var(--dp-cyan-soft), #e6f6f6); border-color:#bfe6e3; }
+.sup2-status.trial .sup2-status-ico{ color:var(--dp-teal-deep); }
+.sup2-status.trial .sup2-status-txt h3{ color:var(--dp-navy); }
+.sup2-status.trial .sup2-status-txt p{ color:var(--dp-teal-deep); }
+
+.sup2-status.expired{ background:linear-gradient(120deg,#fdeceb,#fbe0de); border-color:#f0c4c2; }
+.sup2-status.expired .sup2-status-ico{ color:var(--red); }
+.sup2-status.expired .sup2-status-txt h3{ color:var(--red); }
+.sup2-status.expired .sup2-status-txt p{ color:#9a3b32; }
+
+/* ---------- شبكة الخطط الأربع (عمودان متساويا الارتفاع) ---------- */
+.sup2-plans{
+  display:grid; grid-template-columns:1fr 1fr; gap:11px;
+  margin-bottom:16px;
+}
+.sup2-plan{
+  position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:5px; text-align:center;
+  background:#fff; border:1.5px solid var(--dp-line); border-radius:var(--dp-r-lg);
+  padding:18px 10px 15px; min-height:104px;
+  cursor:pointer; font:inherit;
+  box-shadow:var(--dp-shadow-card);
+  transition:border-color var(--dp-t-fast) var(--dp-ease), box-shadow var(--dp-t-fast) var(--dp-ease), transform var(--dp-t-fast) var(--dp-ease);
+}
+.sup2-plan:active{ transform:scale(.97); }
+.sup2-plan.active{
+  border-color:var(--dp-teal); box-shadow:0 0 0 3px rgba(15,157,151,.16), var(--dp-shadow-card);
+  background:linear-gradient(160deg,#ffffff, var(--dp-cyan-soft));
+}
+.sup2-plan-badge{
+  position:absolute; top:-9px; inset-inline:0; margin:0 auto; width:max-content;
+  background:var(--dp-grad-cta); color:#fff; font-size:.66rem; font-weight:800;
+  padding:3px 10px; border-radius:var(--dp-r-pill); box-shadow:0 4px 10px rgba(15,157,151,.3);
+}
+.sup2-plan-title{ font-family:'Cairo',sans-serif; font-weight:800; font-size:.94rem; color:var(--dp-navy); margin-top:4px; }
+.sup2-plan-usd{ font-family:'Cairo',sans-serif; font-weight:800; font-size:1.2rem; color:var(--dp-teal-deep); }
+.sup2-plan-yer{ font-size:.74rem; color:var(--muted); }
+
+/* ---------- كرت الخطة المختارة ---------- */
+.sup2-selected{
+  background:#fff; border:1px solid var(--dp-line); border-radius:var(--dp-r-lg);
+  padding:16px; margin-bottom:16px; box-shadow:var(--dp-shadow-card);
+}
+.sup2-selected-label{ font-size:.76rem; color:var(--muted); font-weight:700; }
+.sup2-selected-row{
+  display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  margin-top:4px;
+}
+.sup2-selected-name{ font-family:'Cairo',sans-serif; font-size:1.06rem; color:var(--dp-navy); }
+.sup2-selected-price{ font-family:'Cairo',sans-serif; font-weight:800; font-size:1.15rem; color:var(--dp-teal-deep); white-space:nowrap; }
+.sup2-selected-price small{ font-size:.68rem; font-weight:600; color:var(--muted); display:block; text-align:end; }
+.sup2-selected-dur{ display:block; margin-top:2px; font-size:.82rem; color:var(--muted); }
+.sup2-selected-note{
+  display:flex; align-items:center; gap:6px;
+  margin:12px 0 0; padding:9px 11px; border-radius:11px;
+  background:var(--dp-surface-2); border:1px dashed var(--dp-line);
+  font-size:.78rem; color:var(--dp-navy); line-height:1.5;
+}
+.sup2-selected-note svg{ flex:none; width:15px; height:15px; color:var(--dp-teal-deep); }
+.sup2-selected-actions{ display:flex; flex-direction:column; gap:9px; margin-top:14px; }
+.sup2-cta{ width:100%; }
+.sup2-cta-sec{ width:100%; }
+
+/* ---------- الأقسام القابلة للطي ---------- */
+.sup2-collapse{
+  background:#fff; border:1px solid var(--dp-line); border-radius:var(--dp-r-md);
+  margin-bottom:10px; overflow:hidden; box-shadow:var(--dp-shadow-card);
+}
+.sup2-collapse summary{
+  list-style:none; cursor:pointer; user-select:none;
+  display:flex; align-items:center; gap:10px;
+  padding:13px 15px; font-family:'Cairo',sans-serif; font-weight:700; font-size:.92rem; color:var(--dp-navy);
+}
+.sup2-collapse summary::-webkit-details-marker{ display:none; }
+.sup2-collapse summary svg{ flex:none; width:16px; height:16px; color:var(--dp-teal-deep); }
+.sup2-collapse summary::after{
+  content:''; margin-inline-start:auto; width:9px; height:9px;
+  border-inline-end:2px solid var(--muted); border-block-end:2px solid var(--muted);
+  transform:rotate(45deg); transition:transform var(--dp-t-fast) var(--dp-ease);
+}
+.sup2-collapse[open] summary::after{ transform:rotate(-135deg); }
+.sup2-collapse-body{ padding:2px 15px 15px; }
+.sup2-note{ padding:9px 0; border-bottom:1px dashed var(--dp-line); }
+.sup2-note:last-child{ border-bottom:0; padding-bottom:2px; }
+.sup2-note b{ display:block; font-size:.87rem; color:var(--dp-navy); margin-bottom:3px; }
+.sup2-note p{ margin:0; font-size:.82rem; color:var(--muted); line-height:1.55; }
+
+/* ---------- بطاقة الدعم الرسمي (الأبرز في الصفحة) ---------- */
+.sup2-official{
+  position:relative; overflow:hidden;
+  background:var(--dp-grad-hero); color:#fff;
+  border-radius:var(--dp-r-xl); padding:22px 20px 20px;
+  margin:18px 0 14px; box-shadow:var(--dp-shadow-hero);
+}
+.sup2-official-badge{
+  display:inline-block; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28);
+  color:var(--dp-cyan); font-size:.72rem; font-weight:800; letter-spacing:.3px;
+  padding:4px 12px; border-radius:var(--dp-r-pill); margin-bottom:12px;
+}
+.sup2-official-name{ font-family:'Cairo',sans-serif; font-size:1.22rem; margin:0 0 2px; color:#fff; }
+.sup2-official-full{ margin:0 0 10px; font-size:.82rem; color:rgba(255,255,255,.72); }
+.sup2-official-role{ margin:0 0 8px; font-size:.88rem; font-weight:700; color:var(--dp-cyan); line-height:1.5; }
+.sup2-official-desc{ margin:0 0 18px; font-size:.86rem; color:rgba(255,255,255,.86); line-height:1.6; }
+.sup2-official-actions{ display:flex; flex-direction:column; gap:10px; }
+.sup2-official-primary,.sup2-official-secondary{
+  font-family:inherit; font-size:.92rem; font-weight:800; border-radius:13px;
+  padding:13px 16px; cursor:pointer; border:1px solid transparent;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:filter .15s ease, transform .1s ease, background .15s ease;
+}
+.sup2-official-primary{ background:#fff; color:var(--dp-teal-deep); box-shadow:0 8px 20px rgba(0,0,0,.18); }
+.sup2-official-primary:active{ transform:translateY(1px); }
+.sup2-official-secondary{ background:rgba(255,255,255,.1); color:#fff; border-color:rgba(255,255,255,.3); }
+.sup2-official-secondary:active{ transform:translateY(1px); background:rgba(255,255,255,.16); }
+
+/* ---------- بطاقة الوكيل (أهدأ وأصغر) ---------- */
+.sup2-agent{
+  background:var(--dp-surface-2); border:1px solid var(--dp-line);
+  border-radius:var(--dp-r-lg); padding:15px 16px; margin-bottom:10px;
+}
+.sup2-agent-title{ font-family:'Cairo',sans-serif; font-size:.86rem; color:var(--dp-teal-deep); margin:0 0 5px; }
+.sup2-agent-name{ font-family:'Cairo',sans-serif; font-weight:700; font-size:.96rem; color:var(--dp-navy); margin:0 0 4px; }
+.sup2-agent-desc{ font-size:.82rem; color:var(--muted); margin:0 0 12px; line-height:1.55; }
+.sup2-agent-btn{ width:100%; }
+
+/* ============================================================
+   activationOverlay — إعادة تصميم Mobile Premium
+   ============================================================ */
+.dpact-modal{ max-width:420px; }
+.dpact-head{
+  position:relative; overflow:hidden;
+  background:var(--dp-grad-hero) !important;
+  padding:20px 20px 18px !important;
+}
+.dpact-head-glow{
+  position:absolute; inset-inline-end:-30px; top:-30px; width:120px; height:120px;
+  border-radius:50%; background:radial-gradient(circle, rgba(34,200,224,.35), transparent 70%);
+  pointer-events:none;
+}
+.dpact-head-main{ display:flex; align-items:center; gap:10px; position:relative; }
+.dpact-head-ico{
+  flex:none; width:36px; height:36px; border-radius:11px;
+  display:grid; place-items:center; background:rgba(255,255,255,.14); color:#fff;
+}
+.dpact-head h2{ font-size:1.05rem; margin:0; }
+.dpact-close{ position:relative; }
+.dpact-body{ padding:20px 20px calc(18px + env(safe-area-inset-bottom)); }
+.dpact-hint{ margin:0 0 16px; font-size:.86rem; color:var(--muted); line-height:1.6; }
+
+.dpact-idcard{
+  background:var(--dp-surface-2); border:1px solid var(--dp-line);
+  border-radius:var(--dp-r-md); padding:13px 14px; margin-bottom:16px;
+}
+.dpact-idnote{ margin:8px 0 0; font-size:.74rem; color:var(--muted); line-height:1.5; }
+
+.dpact-field{ margin-bottom:8px; }
+.dpact-field input{ text-align:center; letter-spacing:1.5px; font-weight:700; }
+
+.dpact-actions{ margin-top:14px; }
+.dpact-primary{ width:100%; }
+
+.dpact-help{
+  margin-top:20px; padding-top:16px; border-top:1px dashed var(--dp-line);
+  display:flex; flex-direction:column; gap:9px;
+}
+.dpact-help-title{ font-size:.78rem; color:var(--muted); font-weight:700; text-align:center; margin-bottom:2px; }
+.dpact-help-btn{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  font-family:inherit; font-size:.88rem; font-weight:700; cursor:pointer;
+  padding:11px 14px; border-radius:12px; border:1px solid var(--dp-line);
+  background:#fff; color:var(--dp-navy);
+  transition:background .15s ease, border-color .15s ease;
+}
+.dpact-help-btn.wa{ color:#1e8a5a; border-color:#bde9cf; background:var(--wa-soft, #e7faf0); }
+.dpact-help-btn.wa:hover{ filter:brightness(1.03); }
+.dpact-help-btn:hover{ background:var(--dp-surface-2); }
+.dpact-spacer{ height:2px; }
+
+@media (max-width:380px){
+  .sup2-official{ padding:19px 16px 17px; }
+  .sup2-plan{ padding:15px 8px 13px; min-height:96px; }
+}

@@ -34,24 +34,63 @@
   </div>
 
   <!-- شاشة التفعيل (بوابة إلزامية لمرة واحدة على الجهاز) -->
+  <!-- ملاحظة: جميع المعرّفات أدناه يقرأها activation.js مباشرة — لا يجوز تغييرها:
+       activationOverlay · actTitle · actHint · actDeviceId · actCopyBtn · actCode · actError · actActivateBtn -->
   <div id="activationOverlay" class="modal-overlay act-overlay" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="actTitle">
-      <div class="modal-head"><h2 id="actTitle">🔒 تفعيل DentPilot</h2></div>
-      <div class="form">
-        <p class="form-hint" id="actHint">يحتاج التطبيق إلى تفعيل لمرة واحدة على هذا الجهاز. انسخ «معرّف الجهاز» أدناه وأرسله للمطوّر لاستلام كود التفعيل.</p>
-        <label class="act-label">معرّف الجهاز</label>
-        <div class="act-idrow">
-          <span id="actDeviceId" class="act-id">—</span>
-          <button type="button" id="actCopyBtn" class="btn btn-ghost act-copy">نسخ</button>
+    <div class="modal dpact-modal" role="dialog" aria-modal="true" aria-labelledby="actTitle">
+
+      <div class="modal-head dpact-head">
+        <span class="dpact-head-glow" aria-hidden="true"></span>
+        <div class="dpact-head-main">
+          <span class="dpact-head-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.4"/><path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9"/><path d="M12 14.6v2.2"/></svg>
+          </span>
+          <h2 id="actTitle">تفعيل DentPilot Pro</h2>
         </div>
-        <div class="field" style="margin-top:16px">
+        <button type="button" id="actClose" class="modal-close dpact-close" aria-label="إغلاق" hidden>
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <div class="form dpact-body">
+        <p class="dpact-hint" id="actHint">يحتاج التطبيق إلى تفعيل لمرة واحدة على هذا الجهاز. انسخ «معرّف الجهاز» أدناه وأرسله للدعم الرسمي لاستلام كود التفعيل الخاص بهذا الجهاز.</p>
+
+        <div class="dpact-idcard">
+          <span class="act-label">معرّف الجهاز</span>
+          <div class="act-idrow">
+            <span id="actDeviceId" class="act-id">—</span>
+            <button type="button" id="actCopyBtn" class="btn btn-ghost act-copy">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.2"/><path d="M5.5 15H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v.5"/></svg>
+              نسخ
+            </button>
+          </div>
+          <p class="dpact-idnote">هذا الرمز خاص بهذا الجهاز فقط، وكود التفعيل يُولَّد منه.</p>
+        </div>
+
+        <div class="field dpact-field">
           <label for="actCode">كود التفعيل</label>
           <input type="text" id="actCode" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" inputmode="latin" />
         </div>
+
         <p id="actError" class="act-error" hidden>⚠️ كود التفعيل غير صحيح لهذا الجهاز.</p>
-        <div class="form-actions">
-          <button type="button" id="actActivateBtn" class="btn btn-primary" style="width:100%">تفعيل التطبيق</button>
+
+        <div class="form-actions dpact-actions">
+          <button type="button" id="actActivateBtn" class="btn btn-primary dpact-primary">تفعيل التطبيق</button>
         </div>
+
+        <div class="dpact-help">
+          <span class="dpact-help-title">لا تملك كود تفعيل؟</span>
+          <button type="button" id="actWaBtn" class="dpact-help-btn wa">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.8L3.5 20.5l4.3-1.1A8.5 8.5 0 1 0 12 3.5z"/><path d="M8.8 9.2c0 3.3 2.7 6 6 6l1.3-1.3-1.9-1.2-1 .7a4.6 4.6 0 0 1-2.6-2.6l.7-1-1.2-1.9z"/></svg>
+            طلب كود التفعيل من الدعم الرسمي
+          </button>
+          <button type="button" id="actAgentBtn" class="dpact-help-btn" hidden>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s6.5-5.4 6.5-10.2A6.5 6.5 0 0 0 5.5 10.8C5.5 15.6 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.4"/></svg>
+            التواصل مع الوكيل المعتمد
+          </button>
+        </div>
+
+        <div class="dpact-spacer" aria-hidden="true"></div>
       </div>
     </div>
   </div>
@@ -318,8 +357,16 @@
 
     <!-- ============ الدعم والتفعيل ============ -->
     <section class="view" id="view-support" data-view="support" hidden>
-      <div class="page-head"><h2>🎫 الدعم والتفعيل</h2></div>
-      <div id="supportBody"></div>
+      <header class="sup2-head">
+        <span class="sup2-head-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5V10a2 2 0 0 0 0 4v2.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 16.5V14a2 2 0 0 0 0-4z"/><path d="M13.5 6.5v11"/></svg>
+        </span>
+        <div class="sup2-head-txt">
+          <h2>الدعم والتفعيل</h2>
+          <p>اختر الخطة المناسبة ثم أكمل التفعيل بسهولة.</p>
+        </div>
+      </header>
+      <div id="supportBody" class="sup2"></div>
     </section>
 
     <!-- ============ ملف المريض ============ -->
