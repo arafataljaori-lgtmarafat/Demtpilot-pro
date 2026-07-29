@@ -5,7 +5,10 @@ const CACHE = 'dentpilot-v2.5.2';
 const ASSETS = [
   './', 'index.html', 'style.css', 'script.js', 'activation.js', 'manifest.json', 'version.json',
   'icon-192.png', 'icon-512.png', 'icon-512-maskable.png', 'apple-touch-icon.png', 'favicon.ico', 'favicon-32.png',
-  'dental-chair-navy.png'
+  'dental-chair-navy.png',
+  // ملفات الحساب/المزامنة المحلية فقط (لا تُضاف روابط CDN الخارجية لـ Firebase هنا نهائياً،
+  // حتى لا يفشل التثبيت بالكامل إن تعذّر الوصول لأي منها — راجع fetch handler أدناه للتعامل معها كطلبات عادية)
+  'firebase-config.js', 'firebase-auth.js', 'firebase-sync.js', 'account-ui.js'
 ];
 
 // التثبيت: تخزين مسبق فقط — بلا skipWaiting تلقائي (ينتظر موافقة المستخدم)

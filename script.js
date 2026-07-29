@@ -194,7 +194,7 @@
   let toastTimer = null;
   let patientsFilter = 'all'; // 'all' | 'today' | 'late' | 'upcoming' — فلترة عرض فقط، لا تغيير في البيانات
 
-  const VIEWS = ['dashboard', 'patients', 'completed', 'late', 'stats', 'reports', 'backup', 'support', 'file'];
+  const VIEWS = ['dashboard', 'patients', 'completed', 'late', 'stats', 'reports', 'backup', 'support', 'account', 'file'];
 
   /* ============================================================
      التخزين
@@ -206,11 +206,16 @@
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(patients)); }
     catch (e) { alert('تعذّر حفظ البيانات. قد تكون مساحة التخزين ممتلئة.'); }
+    // حدث اختياري لأي وحدة خارجية (مثل مزامنة الحساب) تستمع دون أي تعديل في منطق الحفظ نفسه
+    try { document.dispatchEvent(new CustomEvent('dp:patients-saved')); } catch (e) {}
   }
   function loadSettings() {
     try { const r = localStorage.getItem(SETTINGS_KEY); if (r) settings = Object.assign(settings, JSON.parse(r)); } catch (e) {}
   }
-  function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {} }
+  function saveSettings() {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
+    try { document.dispatchEvent(new CustomEvent('dp:settings-saved')); } catch (e) {}
+  }
 
   // المرفقات (مفتاح منفصل)
   function loadAttachments() {
@@ -1197,6 +1202,10 @@
     else if (currentView === 'stats') renderStats();
     else if (currentView === 'reports') renderReports();
     else if (currentView === 'support') renderSupport();
+    else if (currentView === 'account') {
+      if (window.DPAccountUI && typeof window.DPAccountUI.render === 'function') window.DPAccountUI.render();
+      else { const b = $('accountBody'); if (b) b.innerHTML = '<div class="sup2-status expired"><div class="sup2-status-txt"><h3>تعذّر تحميل صفحة الحساب</h3><p>تحقّق من اتصال الجهاز وأعد فتح التطبيق.</p></div></div>'; }
+    }
     else if (currentView === 'file') renderFile(currentParam);
   }
   function refresh() { renderActiveView(); }
@@ -1860,6 +1869,8 @@
         patients = obj.patients; normalize();
         if (obj.settings && typeof obj.settings === 'object') settings = Object.assign({ doctorName: '', specialty: '', clinic: '' }, obj.settings);
         if (obj.attachments && typeof obj.attachments === 'object') { attachments = obj.attachments; try { saveAttachments(); } catch (e) {} }
+        // إشارة مستقلة قبل الحفظ: تتيح لوحدة المزامنة (إن وُجدت) تعليق أي مزامنة تلقائية لهذا الاستيراد تحديداً
+        try { document.dispatchEvent(new CustomEvent('dp:backup-imported')); } catch (e) {}
         save(); saveSettings(); applyDoctorLabel(); refresh(); buildAlerts(false);
         toast('تم استيراد النسخة الاحتياطية بنجاح');
       } catch (err) { toast('تعذّر استيراد الملف — تأكد أنه نسخة DentPilot صحيحة'); }
@@ -2195,6 +2206,23 @@
       if (els.doctorOverlay && !els.doctorOverlay.hidden) updateSettingsStatus();
       if (currentView === 'support') renderSupport();        // تحديث كرت الحالة فوراً دون إعادة تحميل
       toast('تم تفعيل التطبيق بنجاح');
+    };
+
+    // ---- جسر صغير لوحدات خارجية اختيارية (firebase-sync.js/account-ui.js) ----
+    // مسؤوليته الوحيدة: إعادة قراءة LocalStorage (بعد أن تكون وحدة المزامنة كتبت فيه مباشرة
+    // بنفس مفاتيح التخزين الحالية) إلى الذاكرة الحيّة للتطبيق وإعادة الرسم، دون تكرار أي منطق
+    // تحميل/تطبيع/عرض هنا — فقط استدعاء الدوال الحقيقية الموجودة أصلاً. لا يكتب هذا الجسر أي بيانات بنفسه.
+    window.DPApp = {
+      reloadFromStorage: function () {
+        try {
+          load(); normalize(); loadSettings(); applyDoctorLabel();
+          if (currentView === 'account') { if (window.DPAccountUI && window.DPAccountUI.render) window.DPAccountUI.render(); }
+          else refresh();
+          buildAlerts(false);
+        } catch (e) {}
+      },
+      getPatientsCount: function () { return Array.isArray(patients) ? patients.length : 0; },
+      getSettingsSnapshot: function () { return { doctorName: settings.doctorName || '', clinic: settings.clinic || '', specialty: settings.specialty || '' }; }
     };
     updateTrialBanner();
     setInterval(updateTrialBanner, 60000);
