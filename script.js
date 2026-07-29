@@ -107,7 +107,7 @@
   };
 
   const $ = (id) => document.getElementById(id);
-  const APP_VERSION = '2.5.1';
+  const APP_VERSION = '2.6.0';
   const els = {
     splash: $('splash'), backBtn: $('backBtn'), installBtn: $('installBtn'), docLabel: $('docLabel'),
     trialBanner: $('trialBanner'), trialText: $('trialText'),
