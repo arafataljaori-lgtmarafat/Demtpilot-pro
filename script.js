@@ -107,7 +107,7 @@
   };
 
   const $ = (id) => document.getElementById(id);
-  const APP_VERSION = '2.6.0';
+  const APP_VERSION = '2.6.1';
   const els = {
     splash: $('splash'), backBtn: $('backBtn'), installBtn: $('installBtn'), docLabel: $('docLabel'),
     trialBanner: $('trialBanner'), trialText: $('trialText'),
@@ -646,6 +646,16 @@
   function supStatusCardHtml(state) {
     const t = PRO_SUPPORT_CONFIG.texts;
     if (state === 'activated') {
+      let info = null; try { info = window.DPLicense && window.DPLicense.getActivationInfo ? window.DPLicense.getActivationInfo() : null; } catch (e) {}
+      if (info && info.expiresAt) {
+        const remain = Math.max(0, Math.ceil((info.expiresAt - Date.now()) / 86400000));
+        const d = new Date(info.expiresAt); const p = (n) => String(n).padStart(2, '0');
+        const expStr = p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear();
+        return `<div class="sup2-status ok">
+          <span class="sup2-status-ico" aria-hidden="true">${ICO.checkCircle}</span>
+          <div class="sup2-status-txt"><h3>مفعّل — ${escapeHtml(info.planLabel || '')}</h3><p>ينتهي في ${expStr} (متبقٍ ${remain} يوم)</p></div>
+        </div>`;
+      }
       return `<div class="sup2-status ok">
         <span class="sup2-status-ico" aria-hidden="true">${ICO.checkCircle}</span>
         <div class="sup2-status-txt"><h3>${escapeHtml(t.statusActivated.title)}</h3><p>${escapeHtml(t.statusActivated.desc)}</p></div>
@@ -1239,9 +1249,19 @@
     if (els.appVersion) els.appVersion.textContent = APP_VERSION;
     if (els.accessStatus && window.DPLicense) {
       var st = window.DPLicense.getAccessState();
-      els.accessStatus.textContent = st === 'activated' ? 'مفعل'
-        : st === 'trial' ? ('تجربة مجانية — المتبقي: ' + window.DPLicense.trialRemainingHours() + ' ساعة')
-        : 'انتهت التجربة';
+      if (st === 'activated') {
+        var info = window.DPLicense.getActivationInfo ? window.DPLicense.getActivationInfo() : null;
+        if (info && info.expiresAt) {
+          var remain = Math.max(0, Math.ceil((info.expiresAt - Date.now()) / 86400000));
+          var expDate = new Date(info.expiresAt); var p = function (n) { return String(n).padStart(2, '0'); };
+          els.accessStatus.textContent = 'مفعّل — ' + (info.planLabel || '') + ' — ينتهي ' + p(expDate.getDate()) + '/' + p(expDate.getMonth() + 1) + '/' + expDate.getFullYear() + ' (متبقٍ ' + remain + ' يوم)';
+        } else {
+          els.accessStatus.textContent = 'مفعّل — تفعيل دائم';
+        }
+      } else {
+        els.accessStatus.textContent = st === 'trial' ? ('تجربة مجانية — المتبقي: ' + window.DPLicense.trialRemainingHours() + ' ساعة')
+          : 'انتهت التجربة';
+      }
     }
     if (els.updateStatus) els.updateStatus.textContent = '';
   }
