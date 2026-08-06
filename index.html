@@ -33,6 +33,45 @@
     </div>
   </div>
 
+  <!-- الصفحة الافتتاحية (تظهر عند أول استخدام للتطبيق فقط) -->
+  <div id="onboardOverlay" class="onboard-overlay" hidden>
+    <span class="onboard-glow g1" aria-hidden="true"></span>
+    <span class="onboard-glow g2" aria-hidden="true"></span>
+    <span class="onboard-grid" aria-hidden="true"></span>
+    <div class="onboard-content">
+      <div class="onboard-logo">
+        <img src="icon-192.png" alt="DentPilot" width="60" height="60" />
+        <b>DentPilot</b>
+      </div>
+      <h1 class="onboard-title">مرحبًا بك</h1>
+      <p class="onboard-sub">اختر طريقة الدخول للمتابعة</p>
+
+      <div class="onboard-cards">
+        <button type="button" class="onboard-card" id="onboardLocalBtn">
+          <span class="onboard-card-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.4 12 4l8 6.4V19a1.6 1.6 0 0 1-1.6 1.6h-3.6v-5.8H9.2v5.8H5.6A1.6 1.6 0 0 1 4 19z"/></svg>
+          </span>
+          <span class="onboard-card-txt">
+            <b>الدخول محليًا</b>
+            <small>اضغط للدخول مباشرة إلى التطبيق</small>
+          </span>
+          <span class="onboard-card-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span>
+        </button>
+
+        <button type="button" class="onboard-card" id="onboardEmailBtn">
+          <span class="onboard-card-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2.4"/><path d="M4.5 7 12 12.5 19.5 7"/></svg>
+          </span>
+          <span class="onboard-card-txt">
+            <b>التسجيل بالبريد الإلكتروني</b>
+            <small>أنشئ حسابًا لمزامنة بياناتك والاحتفاظ بها سحابيًا</small>
+          </span>
+          <span class="onboard-card-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- شاشة التفعيل (بوابة إلزامية لمرة واحدة على الجهاز) -->
   <!-- ملاحظة: جميع المعرّفات أدناه يقرأها activation.js مباشرة — لا يجوز تغييرها:
        activationOverlay · actTitle · actHint · actDeviceId · actCopyBtn · actCode · actError · actActivateBtn -->
@@ -233,6 +272,29 @@
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
         </span>
       </button>
+
+      <!-- صفّ مصغّر: المخزون (تشويقي) + طلب مواد (وظيفة فعلية) -->
+      <div class="dash-mini-row">
+        <button class="dash-mini-card mini-inventory" data-go="inventory" type="button">
+          <span class="dmc-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5 12 3.5l8 4V18a1.6 1.6 0 0 1-1.6 1.6H5.6A1.6 1.6 0 0 1 4 18Z"/><path d="M4 7.5 12 11.5l8-4"/><path d="M12 11.5V20"/></svg>
+          </span>
+          <span class="dmc-txt">
+            <b>المخزون</b>
+            <small>إدارة مستلزمات العيادة</small>
+          </span>
+          <span class="dmc-soon">قريبًا</span>
+        </button>
+        <button class="dash-mini-card mini-materials" data-go="materials" type="button">
+          <span class="dmc-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9l3.5 3.5V19a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 19V5A1.5 1.5 0 0 1 6 3.5Z"/><path d="M14.5 3.5V7a1 1 0 0 0 1 1h3.5"/><path d="M8.2 12.5h7.6M8.2 15.6h5"/></svg>
+          </span>
+          <span class="dmc-txt">
+            <b>طلب مواد</b>
+            <small>إنشاء طلب شراء للعيادة</small>
+          </span>
+        </button>
+      </div>
       </div>
 
       <div class="section-head" id="todaySection">
@@ -374,6 +436,47 @@
       <div id="accountBody" class="sup2"></div>
     </section>
 
+    <!-- ============ إكمال التفعيل (الصفحة الثانية من مسار الدعم والتفعيل) ============ -->
+    <section class="view" id="view-activate" data-view="activate" hidden>
+      <header class="sup2-head act2-head">
+        <button type="button" id="act2BackBtn" class="act2-back" aria-label="رجوع إلى الخطط">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <div class="sup2-head-txt">
+          <h2>إكمال التفعيل</h2>
+        </div>
+      </header>
+      <div id="activateBody" class="sup2"></div>
+    </section>
+
+    <!-- ============ المخزون (صفحة تشويقية — بلا وظائف فعلية) ============ -->
+    <section class="view" id="view-inventory" data-view="inventory" hidden>
+      <header class="sup2-head inv-head">
+        <button type="button" id="invBackBtn" class="act2-back" aria-label="رجوع">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <div class="sup2-head-txt">
+          <h2>إدارة المخزون</h2>
+          <p>ميزة قادمة لإدارة مستلزمات العيادة بالكامل.</p>
+        </div>
+      </header>
+      <div id="inventoryBody" class="sup2"></div>
+    </section>
+
+    <!-- ============ طلب مواد للعيادة ============ -->
+    <section class="view" id="view-materials" data-view="materials" hidden>
+      <header class="sup2-head mreq-head">
+        <button type="button" id="mreqBackBtn" class="act2-back" aria-label="رجوع">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <div class="sup2-head-txt">
+          <h2>طلب مواد للعيادة</h2>
+          <p>أنشئ طلب شراء مستلزمات واحفظه أو اطبعه.</p>
+        </div>
+      </header>
+      <div id="materialsBody" class="sup2"></div>
+    </section>
+
     <!-- ============ ملف المريض ============ -->
     <section class="view" id="view-file" data-view="file" hidden>
       <div id="fileBody"></div>
@@ -391,9 +494,13 @@
       <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="8.5" cy="7" r="3.5"/><path d="M17 4.2a3.5 3.5 0 0 1 0 6.6M22 20v-1.5a4 4 0 0 0-3-3.8"/></svg>
       <span>المرضى</span>
     </button>
-    <button type="button" class="home-tab-btn" data-go="settings">
-      <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.6v2.2M12 19.2v2.2M21.4 12h-2.2M4.8 12H2.6M18.6 5.4 17 7M7 17l-1.6 1.6M18.6 18.6 17 17M7 7 5.4 5.4"/></svg>
-      <span>الإعدادات</span>
+    <button type="button" class="home-tab-btn" data-go="support">
+      <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.3"/><path d="M6.3 6.3l3.2 3.2M18 18l-3.2-3.2M6.3 18l3.2-3.2M18 6l-3.2 3.2"/></svg>
+      <span>التفعيل</span>
+    </button>
+    <button type="button" class="home-tab-btn" data-go="account">
+      <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M4.5 19.2a7.5 7.5 0 0 1 15 0"/></svg>
+      <span>حسابك</span>
     </button>
   </nav>
 
@@ -771,6 +878,47 @@
           <button type="submit" class="btn btn-primary">حفظ الجلسة</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- نافذة اختيار جهة التواصل (تفتح عند طلب التفعيل عبر واتساب) -->
+  <div id="contactChoiceOverlay" class="modal-overlay" hidden>
+    <div class="modal modal-sm cc-modal" role="dialog" aria-modal="true" aria-labelledby="ccTitle">
+      <div class="modal-head">
+        <h2 id="ccTitle">التواصل لإتمام التفعيل</h2>
+        <button type="button" id="ccClose" class="modal-close" aria-label="إغلاق">✕</button>
+      </div>
+      <div class="cc-body">
+        <button type="button" class="cc-bar cc-official" data-act="cc-official">
+          <span class="cc-bar-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5a8.5 8.5 0 0 0-7.3 12.8L3.5 20.5l4.3-1.1A8.5 8.5 0 1 0 12 3.5z"/></svg>
+          </span>
+          <span class="cc-bar-txt">انقر لمراسلة الدعم الرسمي</span>
+        </button>
+        <button type="button" class="cc-bar cc-agent" data-act="cc-agent">
+          <span class="cc-bar-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s6.5-5.4 6.5-10.2A6.5 6.5 0 0 0 5.5 10.8C5.5 15.6 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.4"/></svg>
+          </span>
+          <span class="cc-bar-txt">انقر لمراسلة وكيل محافظة إب</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- معاينة طلب المواد قبل التصدير/الطباعة -->
+  <div id="mreqPreviewOverlay" class="modal-overlay mreq-preview-overlay" hidden>
+    <div class="modal mreq-preview-modal" role="dialog" aria-modal="true" aria-labelledby="mreqPreviewTitle">
+      <div class="modal-head">
+        <h2 id="mreqPreviewTitle">معاينة طلب المواد</h2>
+        <button type="button" id="mreqPreviewClose" class="modal-close" aria-label="إغلاق">✕</button>
+      </div>
+      <div class="mreq-preview-scroll">
+        <div id="mreqPreviewStage" class="mreq-preview-stage"></div>
+      </div>
+      <div class="form-actions mreq-preview-actions">
+        <button type="button" class="btn btn-ghost" id="mreqPreviewPrintBtn">طباعة</button>
+        <button type="button" class="btn btn-primary" id="mreqPreviewPdfBtn">حفظ PDF</button>
+      </div>
     </div>
   </div>
 

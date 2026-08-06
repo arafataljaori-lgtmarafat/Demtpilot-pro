@@ -227,6 +227,9 @@ function _dp3StateSig(normalizedDevice, normalizedCode, startsAt, expiresAt) {
     getActivationInfo: activationInfo,
     getAccessState: accessState, trialRemainingMs: trialRemainingMs,
     trialRemainingHours: trialRemainingHours, trialRemainingDays: trialRemainingDays,
+    // يكشف دالة التحقق/الحفظ الحالية كما هي دون أي تعديل في منطقها — لاستخدامها من صفحة
+    // «إكمال التفعيل» الجديدة (script.js) دون تكرار الخوارزمية أو إعادة كتابتها.
+    activate: activate,
     onActivated: null
   };
 

@@ -22,18 +22,18 @@
 
     // ---- بيانات الدعم الرسمي (تُعرض في البطاقة — بلا أي رقم هاتف ظاهر للمستخدم) ----
     official: {
-      badge: 'الدعم الرسمي',
+      badge: 'المطور الرسمي',
       name: 'د. عرفات الجعوري',
       fullName: 'د. عرفات علي الجعوري',
-      role: 'مطور DentPilot Pro والمشرف على الدعم والتفعيل',
+      role: 'مطوّر DentPilot والمشرف على الدعم والتفعيل',
       description: 'للتفعيل، الدعم الفني، والاستفسارات المتعلقة بالتطبيق.'
     },
 
     // ---- الوكيل المعتمد (كائن مستقل — لا يُعرض رقمه في الواجهة إطلاقاً) ----
     agent: {
-      title: 'وكيل DentPilot المعتمد في محافظة إب',
+      title: 'الوكيل المعتمد',
       name: 'د. فراس المجمر',
-      description: 'يمكنكم التواصل معه للحصول على كود التفعيل أو لأي استفسار متعلق بالتطبيق.'
+      description: 'وكيل محافظة إب'
     },
     // رقم واتساب الوكيل بصيغة دولية دون علامة + — يُستخدم فقط داخل رابط wa.me، لا يُطبع كنص أبداً.
     agentWhatsApp: '967771697735',
@@ -107,7 +107,7 @@
   };
 
   const $ = (id) => document.getElementById(id);
-  const APP_VERSION = '2.6.1';
+  const APP_VERSION = '2.6.3';
   const els = {
     splash: $('splash'), backBtn: $('backBtn'), installBtn: $('installBtn'), docLabel: $('docLabel'),
     trialBanner: $('trialBanner'), trialText: $('trialText'),
@@ -194,7 +194,7 @@
   let toastTimer = null;
   let patientsFilter = 'all'; // 'all' | 'today' | 'late' | 'upcoming' — فلترة عرض فقط، لا تغيير في البيانات
 
-  const VIEWS = ['dashboard', 'patients', 'completed', 'late', 'stats', 'reports', 'backup', 'support', 'account', 'file'];
+  const VIEWS = ['dashboard', 'patients', 'completed', 'late', 'stats', 'reports', 'backup', 'support', 'account', 'activate', 'inventory', 'materials', 'file'];
 
   /* ============================================================
      التخزين
@@ -769,6 +769,7 @@
     </div>`;
   }
 
+  // ---- الصفحة الأولى: الدعم والتفعيل (اختيار الخطة فقط — بلا طرق دفع أو خطوات أو حقل كود هنا) ----
   function renderSupport() {
     const body = $('supportBody'); if (!body) return;
     let state = 'activated';
@@ -776,12 +777,481 @@
 
     body.innerHTML = `
       ${supStatusCardHtml(state)}
+      <h3 class="sup2-plans-title">اختر مدة الاشتراك التي تريد تفعيلها</h3>
       ${supPlansGridHtml()}
-      ${supSelectedPlanCardHtml()}
-      ${supCollapsibleSectionsHtml()}
       ${supOfficialCardHtml()}
+      <h3 class="sup2-agents-title">الوكلاء</h3>
       ${supAgentCardHtml()}
     `;
+  }
+
+  // اختيار خطة من شبكة الخطط: يُظهر حالة التحديد بصرياً فوراً، ثم ينتقل مباشرة
+  // إلى صفحة «إكمال التفعيل» دون أي زر متابعة إضافي.
+  function selectSupportPlanAndContinue(planKey) {
+    selectedSupportPlan = planKey;
+    renderSupport();
+    setTimeout(function () { go('activate'); }, 260);
+  }
+
+  /* ============================================================
+     الصفحة الثانية: إكمال التفعيل
+     - نفس بيانات PRO_SUPPORT_CONFIG ونفس منطق window.DPLicense تماماً
+     - الدفع + رمز التطبيق + التواصل عبر واتساب + إدخال كود التفعيل
+     ============================================================ */
+
+  // ---- كرت ملخص الخطة المختارة أعلى الصفحة (اسم الخطة + السعر + زر «تغيير الخطة» في صفّ مدمج) ----
+  function act2PlanSummaryHtml() {
+    const p = planByKey(selectedSupportPlan);
+    return `<div class="sup2-selected act2-summary">
+      <div class="sup2-selected-row act2-summary-row">
+        <span class="act2-summary-main">
+          <b class="sup2-selected-name">${escapeHtml(p.title)}</b>
+          <span class="sup2-selected-dur">${escapeHtml(p.duration)}</span>
+        </span>
+        <span class="act2-summary-side">
+          <span class="sup2-selected-price">${escapeHtml(p.usd)} <small>${escapeHtml(p.yer)}</small></span>
+          <button type="button" class="act2-change-plan" data-act="change-plan">تغيير الخطة</button>
+        </span>
+      </div>
+    </div>`;
+  }
+
+  // ---- قسم الدفع: صفّ واحد جنبًا إلى جنب على الهاتف، وزر نسخ صغير ملاصق للرقم ----
+  function act2PaymentSectionHtml() {
+    const k = PRO_SUPPORT_CONFIG.payMethods.alkuraimi, j = PRO_SUPPORT_CONFIG.payMethods.jeeb;
+    const method = (m, idx) => `<div class="sup-pay act2-pay">
+      <div class="sup-pay-head">${escapeHtml(m.name)}</div>
+      ${m.holder ? `<div class="sup-pay-row"><span>الحساب</span><b>${escapeHtml(m.holder)}</b></div>` : ''}
+      <div class="sup-pay-row act2-pay-numrow">
+        <span>${escapeHtml(m.numberLabel)}</span>
+        <span class="act2-pay-numwrap">
+          <b class="sup-num">${escapeHtml(m.number)}</b>
+          <button type="button" class="act2-copy-inline" data-act="act2-copy-pay" data-copy="${escapeHtml(m.number)}" data-idx="${idx}" aria-label="نسخ الرقم">نسخ</button>
+        </span>
+      </div>
+    </div>`;
+    return `<div class="act2-section">
+      <h3 class="act2-section-title">حوّل مبلغ الاشتراك</h3>
+      <div class="sup-pays act2-pays">${method(k, 0)}${method(j, 1)}</div>
+    </div>`;
+  }
+
+  // ---- قسم رمز التطبيق (معرّف الجهاز الحالي — بلا أي تغيير في طريقة إنشائه) ----
+  function act2AppCodeSectionHtml() {
+    const code = deviceIdSafe();
+    return `<div class="act2-section">
+      <h3 class="act2-section-title">رمز التطبيق الخاص بك</h3>
+      <p class="act2-appcode-note">رمز آمن خاص بجهازك لإصدار كود التفعيل فقط، ولا يحتوي على أي بيانات شخصية.</p>
+      <div class="act2-appcode-box">
+        <span class="act2-appcode-val">${escapeHtml(code)}</span>
+        <button type="button" class="btn btn-ghost act2-copy-btn" data-act="copy" data-copy="${escapeHtml(code)}">نسخ</button>
+      </div>
+      <button type="button" class="btn btn-primary act2-send-btn" data-act="open-contact-choice">إرسال طلب التفعيل إلى واتساب الإدارة</button>
+    </div>`;
+  }
+
+  // ---- قسم إدخال كود التفعيل — مرتبط بمنطق التحقق الحالي (window.DPLicense.activate) دون أي تعديل ----
+  function act2CodeEntrySectionHtml() {
+    return `<div class="act2-section">
+      <h3 class="act2-section-title">الصق رمز التفعيل الذي حصلت عليه من الدعم</h3>
+      <div class="field act2-code-field">
+        <div class="act2-code-row">
+          <input type="text" id="act2CodeInput" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" inputmode="latin" />
+          <button type="button" id="act2PasteBtn" class="btn btn-ghost act2-paste-btn" data-act="act2-paste" hidden>لصق</button>
+        </div>
+      </div>
+      <p id="act2CodeMsg" class="act-error" hidden></p>
+      <button type="button" id="act2ActivateBtn" class="btn btn-primary act2-activate-btn" data-act="act2-activate">تفعيل التطبيق</button>
+    </div>`;
+  }
+
+  function act2FaqSectionHtml() {
+    const cfg = PRO_SUPPORT_CONFIG;
+    return `<details class="sup2-collapse">
+      <summary>${ICO.note}<span>أسئلة وملاحظات مهمة</span></summary>
+      <div class="sup2-collapse-body">
+        ${cfg.notes.map(n => `<div class="sup2-note"><b>${escapeHtml(n.q)}</b><p>${escapeHtml(n.a)}</p></div>`).join('')}
+      </div>
+    </details>`;
+  }
+
+  function renderActivate() {
+    const body = $('activateBody'); if (!body) return;
+    body.innerHTML = `
+      ${act2PlanSummaryHtml()}
+      ${act2PaymentSectionHtml()}
+      ${act2AppCodeSectionHtml()}
+      ${act2CodeEntrySectionHtml()}
+      ${act2FaqSectionHtml()}
+    `;
+    // زر «لصق» يظهر فقط إن كان المتصفّح يدعم قراءة الحافظة
+    var pasteBtn = $('act2PasteBtn');
+    if (pasteBtn && navigator.clipboard && navigator.clipboard.readText) pasteBtn.hidden = false;
+  }
+
+  // ---- نسخ رقم دفع مع تبديل نص الزر مؤقتاً إلى «تم النسخ ✓» ----
+  function act2CopyPay(btn) {
+    const v = btn.dataset.copy || '';
+    copyText(v);
+    const original = btn.textContent;
+    btn.textContent = 'تم النسخ ✓';
+    btn.classList.add('copied');
+    setTimeout(function () { btn.textContent = original; btn.classList.remove('copied'); }, 1600);
+  }
+
+  // ---- تفعيل التطبيق من الصفحة الثانية: يستخدم window.DPLicense.activate الحالي دون أي تعديل في منطقه ----
+  function act2AttemptActivate() {
+    const inp = $('act2CodeInput'), msg = $('act2CodeMsg');
+    const val = inp ? inp.value.trim() : '';
+    if (!val) {
+      if (msg) { msg.textContent = 'الصق رمز التفعيل أولًا.'; msg.hidden = false; }
+      if (inp) inp.classList.add('invalid');
+      return;
+    }
+    let ok = false;
+    try { ok = window.DPLicense && window.DPLicense.activate ? window.DPLicense.activate(val) : false; } catch (e) { ok = false; }
+    if (ok) {
+      if (msg) msg.hidden = true;
+      if (inp) inp.classList.remove('invalid');
+      if (window.DPLicense && typeof window.DPLicense.onActivated === 'function') window.DPLicense.onActivated();
+      toast('تم تفعيل التطبيق بنجاح ✓');
+      go('dashboard');
+    } else {
+      if (msg) { msg.textContent = 'رمز التفعيل غير صحيح. تأكد من نسخه كاملًا ثم أعد المحاولة.'; msg.hidden = false; }
+      if (inp) inp.classList.add('invalid');
+    }
+  }
+
+  /* ============================================================
+     نافذة اختيار جهة التواصل (تُفتح من زر «إرسال طلب التفعيل»)
+     ============================================================ */
+  function openContactChoice() {
+    const ov = $('contactChoiceOverlay'); if (ov) ov.hidden = false;
+  }
+  function closeContactChoice() {
+    const ov = $('contactChoiceOverlay'); if (ov) ov.hidden = true;
+  }
+
+  /* ============================================================
+     المخزون — صفحة تشويقية فقط (بلا أي وظيفة أو بيانات حقيقية)
+     ============================================================ */
+  function renderInventory() {
+    const body = $('inventoryBody'); if (!body) return;
+    const items = [
+      { t: 'ملخص المخزون', d: 'نظرة سريعة على إجمالي المستلزمات وحالتها العامة.',
+        ico: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.4"/><path d="M3.5 9.5h17M8 4.5v5"/></svg>' },
+      { t: 'المستلزمات', d: 'قائمة كاملة بمواد ومستلزمات العيادة.',
+        ico: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5 12 3.5l8 4V18a1.6 1.6 0 0 1-1.6 1.6H5.6A1.6 1.6 0 0 1 4 18Z"/><path d="M4 7.5 12 11.5l8-4"/><path d="M12 11.5V20"/></svg>' },
+      { t: 'تنبيهات النقص', d: 'تنبيه تلقائي عند اقتراب نفاد إحدى المواد.',
+        ico: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6 2.8 19.5a1.2 1.2 0 0 0 1 1.8h16.4a1.2 1.2 0 0 0 1-1.8z"/><path d="M12 9.5v4.2M12 17.4h.01"/></svg>' },
+      { t: 'سجل الحركات', d: 'سجل زمني لعمليات الإضافة والصرف لكل مادة.',
+        ico: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>' },
+      { t: 'التقارير', d: 'تقارير دورية عن استهلاك المستلزمات وتكلفتها.',
+        ico: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>' }
+    ];
+    body.innerHTML = `
+      <div class="inv-teaser-banner">
+        <span class="inv-teaser-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 4.5 7v10L12 20.5 19.5 17V7Z"/><path d="M12 12v8.5M12 12 4.5 7.5M12 12 19.5 7.5"/></svg></span>
+        <div class="inv-teaser-txt">
+          <b>قسم المخزون قادم قريبًا</b>
+          <small>سيتيح لك إدارة مستلزمات العيادة بالكامل من داخل DentPilot.</small>
+        </div>
+      </div>
+      <div class="inv-cards">
+        ${items.map(it => `
+          <div class="inv-card">
+            <span class="inv-card-ico" aria-hidden="true">${it.ico}</span>
+            <div class="inv-card-txt"><b>${escapeHtml(it.t)}</b><small>${escapeHtml(it.d)}</small></div>
+            <span class="inv-card-badge">قريبًا</span>
+          </div>`).join('')}
+      </div>
+    `;
+  }
+
+  /* ============================================================
+     طلب مواد للعيادة — وظيفة فعلية: مسودة محلية + معاينة + طباعة/PDF
+     لا علاقة له بالمخزون أو الفواتير أو الموردين — مستند بسيط فقط.
+     ============================================================ */
+  const MREQ_DRAFT_KEY = 'dentpilot_mreq_draft_v1';
+  const MREQ_SEQ_KEY = 'dentpilot_mreq_seq_v1';
+  const MREQ_HISTORY_KEY = 'dentpilot_mreq_history_v1';
+  const MREQ_UNITS = ['علبة', 'قطعة', 'عبوة', 'كرتون', 'مل'];
+  let mreqDraft = null;
+  let mreqSaveTimer = null;
+
+  function mreqNextOrderNo() {
+    let n = 1;
+    try { n = (parseInt(localStorage.getItem(MREQ_SEQ_KEY), 10) || 0) + 1; } catch (e) {}
+    try { localStorage.setItem(MREQ_SEQ_KEY, String(n)); } catch (e) {}
+    return 'MR-' + String(n).padStart(4, '0');
+  }
+  function mreqTodayISO() {
+    const d = new Date(); const p = (x) => String(x).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+  function mreqLoadDraft() {
+    try {
+      const raw = localStorage.getItem(MREQ_DRAFT_KEY); if (!raw) return null;
+      const d = JSON.parse(raw);
+      if (d && Array.isArray(d.items)) return d;
+    } catch (e) {}
+    return null;
+  }
+  function mreqNewDraft() {
+    return {
+      orderNo: mreqNextOrderNo(), date: mreqTodayISO(),
+      doctor: settings.doctorName || '', clinic: settings.clinic || '',
+      phone: '', address: '', supplier: '',
+      items: [{ id: sid('mri'), name: '', qty: '', unit: MREQ_UNITS[0], notes: '' }],
+      notes: '', approver: settings.doctorName || ''
+    };
+  }
+  function mreqArchiveCurrentDraft() {
+    // يحفظ آخر 5 طلبات محفوظة سابقاً (بأقل تعديل آمن، بلا واجهة تصفّح بعد) — لا يمسّ المسودة الحالية.
+    if (!mreqDraft || !mreqDraft.items.some(it => String(it.name || '').trim())) return;
+    try {
+      const raw = localStorage.getItem(MREQ_HISTORY_KEY);
+      const hist = raw ? JSON.parse(raw) : [];
+      const list = Array.isArray(hist) ? hist : [];
+      list.unshift(mreqDraft);
+      localStorage.setItem(MREQ_HISTORY_KEY, JSON.stringify(list.slice(0, 5)));
+    } catch (e) {}
+  }
+  function mreqSaveDraft(showToastMsg) {
+    if (!mreqDraft) return;
+    try { localStorage.setItem(MREQ_DRAFT_KEY, JSON.stringify(mreqDraft)); if (showToastMsg) toast('تم حفظ المسودة'); }
+    catch (e) { if (showToastMsg) toast('تعذّر حفظ المسودة'); }
+  }
+  function mreqAutoSave() {
+    clearTimeout(mreqSaveTimer);
+    mreqSaveTimer = setTimeout(function () { mreqSyncFieldsFromDom(); mreqSaveDraft(false); }, 500);
+  }
+  function mreqValidate() {
+    if (!mreqDraft || !mreqDraft.items.length) return { ok: false, msg: 'أضف مادة واحدة على الأقل قبل المتابعة.' };
+    const bad = mreqDraft.items.some(it => !String(it.name || '').trim() || !String(it.qty || '').trim());
+    if (bad) return { ok: false, msg: 'يرجى إدخال اسم المادة والكمية لكل سطر مُضاف.' };
+    return { ok: true };
+  }
+  function mreqShowError(msg) {
+    const el = $('mreqErrorMsg'); if (!el) return;
+    el.textContent = msg; el.hidden = false;
+    setTimeout(() => { el.hidden = true; }, 4000);
+  }
+
+  function mreqItemCardHtml(it, idx) {
+    return `<div class="mreq-item-card" data-id="${it.id}">
+      <div class="mreq-item-row1">
+        <span class="mreq-item-no">#${idx + 1}</span>
+        <input type="text" class="mreq-item-name" data-field="name" placeholder="اسم المادة / المستلزم" value="${escapeHtml(it.name)}" />
+        <button type="button" class="mreq-item-del" data-act="mreq-del-item" data-id="${it.id}" aria-label="حذف المادة">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="mreq-item-row2">
+        <input type="number" class="mreq-item-qty" data-field="qty" min="0" step="any" inputmode="decimal" placeholder="الكمية" value="${escapeHtml(it.qty)}" />
+        <select class="mreq-item-unit" data-field="unit">
+          ${MREQ_UNITS.map(u => `<option value="${u}"${u === it.unit ? ' selected' : ''}>${u}</option>`).join('')}
+        </select>
+      </div>
+      <input type="text" class="mreq-item-notes" data-field="notes" placeholder="ملاحظات (اختياري)" value="${escapeHtml(it.notes)}" />
+    </div>`;
+  }
+
+  function mreqRenderItemsList() {
+    const list = $('mreqItemsList'), empty = $('mreqItemsEmpty'); if (!list) return;
+    if (!mreqDraft.items.length) { list.innerHTML = ''; if (empty) empty.hidden = false; return; }
+    if (empty) empty.hidden = true;
+    list.innerHTML = mreqDraft.items.map((it, idx) => mreqItemCardHtml(it, idx)).join('');
+  }
+
+  function renderMaterials() {
+    const body = $('materialsBody'); if (!body) return;
+    if (!mreqDraft) mreqDraft = mreqLoadDraft() || mreqNewDraft();
+
+    const canShare = !!(navigator.share);
+    body.innerHTML = `
+      <div class="mreq-summary-card">
+        <div class="mreq-summary-top">
+          <span class="mreq-order-badge">رقم الطلب <b>${escapeHtml(mreqDraft.orderNo)}</b></span>
+          <span class="mreq-order-date-wrap">
+            <label for="mreqDate">التاريخ</label>
+            <input type="date" id="mreqDate" value="${escapeHtml(mreqDraft.date)}" />
+          </span>
+        </div>
+        <div class="mreq-summary-grid">
+          <div class="mreq-sum-field"><label for="mreqDoctor">الطبيب</label><input type="text" id="mreqDoctor" value="${escapeHtml(mreqDraft.doctor)}" placeholder="اسم الطبيب" /></div>
+          <div class="mreq-sum-field"><label for="mreqClinic">العيادة</label><input type="text" id="mreqClinic" value="${escapeHtml(mreqDraft.clinic)}" placeholder="اسم العيادة" /></div>
+          <div class="mreq-sum-field"><label for="mreqPhone">رقم الهاتف (اختياري)</label><input type="tel" id="mreqPhone" value="${escapeHtml(mreqDraft.phone)}" placeholder="—" /></div>
+          <div class="mreq-sum-field"><label for="mreqAddress">العنوان (اختياري)</label><input type="text" id="mreqAddress" value="${escapeHtml(mreqDraft.address)}" placeholder="—" /></div>
+          <div class="mreq-sum-field full"><label for="mreqSupplier">المورد / الجهة المرسل إليها (اختياري)</label><input type="text" id="mreqSupplier" value="${escapeHtml(mreqDraft.supplier)}" placeholder="اسم المتجر أو المورد" /></div>
+        </div>
+      </div>
+
+      <div class="act2-section mreq-items-section">
+        <h3 class="act2-section-title">المواد المطلوبة</h3>
+        <div id="mreqItemsList" class="mreq-items-list"></div>
+        <p id="mreqItemsEmpty" class="mreq-items-empty" hidden>لم تُضف أي مادة بعد.</p>
+        <button type="button" class="btn btn-ghost mreq-add-btn" data-act="mreq-add-item">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          إضافة مادة
+        </button>
+      </div>
+
+      <div class="act2-section">
+        <h3 class="act2-section-title">ملاحظات وتوقيع</h3>
+        <div class="field"><textarea id="mreqNotes" rows="2" placeholder="ملاحظات عامة على الطلب (اختياري)">${escapeHtml(mreqDraft.notes)}</textarea></div>
+        <div class="field"><label for="mreqApprover">اسم الطبيب المعتمد</label><input type="text" id="mreqApprover" value="${escapeHtml(mreqDraft.approver)}" /></div>
+        <div class="mreq-sign-box"><span>مكان التوقيع / الختم</span></div>
+      </div>
+
+      <p id="mreqErrorMsg" class="act-error" hidden></p>
+
+      <div class="mreq-actions">
+        <button type="button" class="btn btn-ghost" data-act="mreq-save-draft">حفظ كمسودة</button>
+        <button type="button" class="btn btn-ghost" data-act="mreq-preview">معاينة الطلب</button>
+        <button type="button" class="btn btn-primary" data-act="mreq-pdf">حفظ PDF</button>
+        <button type="button" class="btn btn-primary" data-act="mreq-print">طباعة</button>
+        ${canShare ? `<button type="button" class="btn btn-ghost" data-act="mreq-share">مشاركة الطلب</button>` : ''}
+        <button type="button" class="btn btn-ghost mreq-new-btn" data-act="mreq-new">طلب جديد</button>
+      </div>
+    `;
+    mreqRenderItemsList();
+  }
+
+  // ---- مزامنة حقول الملخص/الملاحظات مع الحالة في الذاكرة (بلا إعادة رسم — يحافظ على التركيز) ----
+  function mreqSyncFieldsFromDom() {
+    if (!mreqDraft) return;
+    const g = (id) => { const el = $(id); return el ? el.value : ''; };
+    mreqDraft.date = g('mreqDate') || mreqDraft.date;
+    mreqDraft.doctor = g('mreqDoctor');
+    mreqDraft.clinic = g('mreqClinic');
+    mreqDraft.phone = g('mreqPhone');
+    mreqDraft.address = g('mreqAddress');
+    mreqDraft.supplier = g('mreqSupplier');
+    mreqDraft.notes = g('mreqNotes');
+    mreqDraft.approver = g('mreqApprover');
+  }
+
+  function mreqAddItem() {
+    mreqSyncFieldsFromDom();
+    mreqDraft.items.push({ id: sid('mri'), name: '', qty: '', unit: MREQ_UNITS[0], notes: '' });
+    mreqRenderItemsList();
+    mreqAutoSave();
+    const cards = document.querySelectorAll('#mreqItemsList .mreq-item-card');
+    const last = cards[cards.length - 1]; if (last) { const nm = last.querySelector('.mreq-item-name'); if (nm) nm.focus(); }
+  }
+  function mreqRemoveItem(id) {
+    if (!mreqDraft) return;
+    mreqSyncFieldsFromDom();
+    mreqDraft.items = mreqDraft.items.filter(it => it.id !== id);
+    mreqRenderItemsList();
+    mreqAutoSave();
+  }
+  function mreqUpdateItemField(id, field, value) {
+    if (!mreqDraft) return;
+    const it = mreqDraft.items.find(x => x.id === id); if (!it) return;
+    it[field] = value;
+    mreqAutoSave();
+  }
+  function mreqStartNew() {
+    mreqSyncFieldsFromDom();
+    mreqSaveDraft(false);
+    mreqArchiveCurrentDraft();
+    mreqDraft = mreqNewDraft();
+    renderMaterials();
+    toast('تم إنشاء طلب جديد');
+  }
+
+  // ---- بناء مستند الطباعة/PDF (A4 · RTL · بلا شعار DentPilot بارز) ----
+  function mreqBuildDocHtml() {
+    mreqSyncFieldsFromDom();
+    const d = mreqDraft;
+    const rows = d.items.map((it, idx) => `
+      <tr>
+        <td>${idx + 1}</td>
+        <td>${escapeHtml(it.name) || '—'}</td>
+        <td>${escapeHtml(String(it.qty || '')) || '—'}</td>
+        <td>${escapeHtml(it.unit) || '—'}</td>
+        <td>${escapeHtml(it.notes) || '—'}</td>
+      </tr>`).join('');
+    return `
+      <div class="mr-doc">
+        <div class="mr-head">
+          <div class="mr-head-main">
+            <h1>${escapeHtml(d.clinic) || 'العيادة'}</h1>
+            ${d.doctor ? `<div>د. ${escapeHtml(d.doctor)}</div>` : ''}
+            ${d.phone ? `<div>هاتف: ${escapeHtml(d.phone)}</div>` : ''}
+            ${d.address ? `<div>${escapeHtml(d.address)}</div>` : ''}
+          </div>
+          <div class="mr-head-meta">
+            <div>رقم الطلب: <b>${escapeHtml(d.orderNo)}</b></div>
+            <div>التاريخ: <b>${escapeHtml(fmtDate(d.date))}</b></div>
+            ${d.supplier ? `<div>إلى: ${escapeHtml(d.supplier)}</div>` : ''}
+          </div>
+        </div>
+
+        <h2 class="mr-title">طلب شراء مواد ومستلزمات للعيادة</h2>
+
+        <table class="mr-table">
+          <thead><tr><th>#</th><th>اسم المادة</th><th>الكمية</th><th>الوحدة</th><th>ملاحظات</th></tr></thead>
+          <tbody>${rows || '<tr><td colspan="5" style="text-align:center">لا توجد مواد</td></tr>'}</tbody>
+        </table>
+
+        ${d.notes ? `<div class="mr-notes"><b>ملاحظات:</b> ${escapeHtml(d.notes)}</div>` : ''}
+
+        <div class="mr-foot">
+          <div class="mr-foot-row">
+            <div class="mr-sign"><span>اسم الطبيب المعتمد</span><b>${escapeHtml(d.approver) || (d.doctor ? 'د. ' + escapeHtml(d.doctor) : '—')}</b></div>
+            <div class="mr-sign"><span>التوقيع / الختم</span><i></i></div>
+          </div>
+          <div class="mr-foot-note">تم إعداد الطلب إلكترونياً — ${escapeHtml(fmtDate(mreqTodayISO()))}</div>
+        </div>
+      </div>`;
+  }
+
+  function mreqSuggestedFileName() {
+    const d = mreqDraft;
+    const clinic = (d.clinic || 'العيادة').replace(/[\\/:*?"<>|]/g, '').trim().replace(/\s+/g, '-');
+    return 'طلب-مواد-' + clinic + '-' + (d.date || mreqTodayISO());
+  }
+
+  function mreqDoPrint() {
+    const v = mreqValidate(); if (!v.ok) { mreqShowError(v.msg); return; }
+    mreqSaveDraft(false);
+    if (!els.printArea) return;
+    els.printArea.innerHTML = mreqBuildDocHtml();
+    const prevTitle = document.title;
+    document.title = mreqSuggestedFileName();
+    document.body.classList.add('printing');
+    const cleanup = () => { document.body.classList.remove('printing'); document.title = prevTitle; window.removeEventListener('afterprint', cleanup); };
+    window.addEventListener('afterprint', cleanup);
+    setTimeout(() => { window.print(); }, 60);
+    setTimeout(cleanup, 1500);
+  }
+
+  function mreqOpenPreview() {
+    const v = mreqValidate(); if (!v.ok) { mreqShowError(v.msg); return; }
+    mreqSaveDraft(false);
+    const stage = $('mreqPreviewStage'), ov = $('mreqPreviewOverlay');
+    if (stage) stage.innerHTML = mreqBuildDocHtml();
+    if (ov) ov.hidden = false;
+  }
+  function mreqClosePreview() { const ov = $('mreqPreviewOverlay'); if (ov) ov.hidden = true; }
+
+  function mreqDoShare() {
+    const v = mreqValidate(); if (!v.ok) { mreqShowError(v.msg); return; }
+    mreqSyncFieldsFromDom();
+    const d = mreqDraft;
+    const lines = [
+      'طلب شراء مواد ومستلزمات للعيادة',
+      'رقم الطلب: ' + d.orderNo, 'التاريخ: ' + fmtDate(d.date),
+      d.clinic ? 'العيادة: ' + d.clinic : '', d.doctor ? 'الطبيب: د. ' + d.doctor : '',
+      '', 'المواد:'
+    ].concat(d.items.map((it, i) => (i + 1) + '. ' + (it.name || '—') + ' — ' + (it.qty || '—') + ' ' + (it.unit || '')))
+      .filter(Boolean);
+    if (navigator.share) {
+      navigator.share({ title: 'طلب مواد للعيادة', text: lines.join('\n') }).catch(() => {});
+    }
   }
 
   /* ============================================================
@@ -1191,6 +1661,8 @@
   function goBack() {
     if (currentView === 'file') go(fileOrigin || 'patients');
     else if (currentView === 'completed') go('patients');
+    else if (currentView === 'activate') go('support');
+    else if (currentView === 'inventory' || currentView === 'materials') go('dashboard');
     else go('dashboard');
   }
   function applyRoute() {
@@ -1216,6 +1688,9 @@
       if (window.DPAccountUI && typeof window.DPAccountUI.render === 'function') window.DPAccountUI.render();
       else { const b = $('accountBody'); if (b) b.innerHTML = '<div class="sup2-status expired"><div class="sup2-status-txt"><h3>تعذّر تحميل صفحة الحساب</h3><p>تحقّق من اتصال الجهاز وأعد فتح التطبيق.</p></div></div>'; }
     }
+    else if (currentView === 'activate') renderActivate();
+    else if (currentView === 'inventory') renderInventory();
+    else if (currentView === 'materials') renderMaterials();
     else if (currentView === 'file') renderFile(currentParam);
   }
   function refresh() { renderActiveView(); }
@@ -2001,10 +2476,14 @@
     bindActivationOverlayExtras();
 
     document.querySelectorAll('.dash-card').forEach(card => card.addEventListener('click', () => go(card.dataset.go)));
+    document.querySelectorAll('.dash-mini-card').forEach(card => card.addEventListener('click', () => go(card.dataset.go)));
     document.querySelectorAll('.home-tab-btn').forEach(btn => btn.addEventListener('click', () => go(btn.dataset.go)));
     initDrawer(); // القائمة الجانبية — واجهة فقط، تستخدم go() الحالي دون أي منطق جديد للبيانات
     if (els.trialBanner) els.trialBanner.addEventListener('click', () => go('support'));
     els.backBtn.addEventListener('click', goBack);
+    const act2BackBtn = $('act2BackBtn'); if (act2BackBtn) act2BackBtn.addEventListener('click', () => go('support'));
+    const invBackBtn = $('invBackBtn'); if (invBackBtn) invBackBtn.addEventListener('click', () => go('dashboard'));
+    const mreqBackBtn = $('mreqBackBtn'); if (mreqBackBtn) mreqBackBtn.addEventListener('click', () => go('dashboard'));
 
     els.addBtn.addEventListener('click', () => openModal(null));
     els.completedBtn.addEventListener('click', () => go('completed'));
@@ -2086,16 +2565,78 @@
       else if (act === 'att-open') openAttachment(id, btn.dataset.att);
       else if (act === 'copy') copyText(btn.dataset.copy);
       else if (act === 'open-activation') openActivation();
-      else if (act === 'select-plan') { selectedSupportPlan = btn.dataset.plan; renderSupport(); }
+      else if (act === 'select-plan') { selectSupportPlanAndContinue(btn.dataset.plan); }
       else if (act === 'request-activation') openActivationRequest();
       else if (act === 'contact-support') openSupportHelp();
       else if (act === 'contact-agent') openAgentRequest();
+      else if (act === 'change-plan') go('support');
+      else if (act === 'open-contact-choice') openContactChoice();
+      else if (act === 'act2-copy-pay') act2CopyPay(btn);
+      else if (act === 'act2-activate') act2AttemptActivate();
+      else if (act === 'act2-paste') {
+        try {
+          navigator.clipboard.readText().then(function (text) {
+            var inp = $('act2CodeInput'); if (inp && text) { inp.value = text.trim(); inp.classList.remove('invalid'); }
+          }).catch(function () {});
+        } catch (e) {}
+      }
+      else if (act === 'mreq-add-item') mreqAddItem();
+      else if (act === 'mreq-del-item') mreqRemoveItem(btn.dataset.id);
+      else if (act === 'mreq-save-draft') { mreqSyncFieldsFromDom(); mreqSaveDraft(true); }
+      else if (act === 'mreq-preview') mreqOpenPreview();
+      else if (act === 'mreq-pdf') mreqDoPrint();
+      else if (act === 'mreq-print') mreqDoPrint();
+      else if (act === 'mreq-share') mreqDoShare();
+      else if (act === 'mreq-new') mreqStartNew();
     });
 
     // مدخل المرفقات يُعاد إنشاؤه مع كل عرض — تفويض حدث التغيير
     $('app').addEventListener('change', (e) => {
       if (e.target && e.target.id === 'attInput') { const pid = e.target.dataset.id; addAttachments(pid, e.target.files); e.target.value = ''; }
     });
+
+    // حقل كود التفعيل في صفحة «إكمال التفعيل» يُعاد إنشاؤه مع كل عرض — تفويض حدث الكتابة
+    $('app').addEventListener('input', (e) => {
+      if (e.target && e.target.id === 'act2CodeInput') { e.target.classList.remove('invalid'); const m = $('act2CodeMsg'); if (m) m.hidden = true; }
+      // حقول طلب المواد (الملخص + بنود المواد) — مزامنة فورية بلا إعادة رسم، حتى لا يفقد الحقل تركيزه
+      const mriCard = e.target.closest && e.target.closest('.mreq-item-card');
+      if (mriCard && e.target.dataset && e.target.dataset.field) {
+        mreqUpdateItemField(mriCard.dataset.id, e.target.dataset.field, e.target.value);
+      } else if (e.target.id && /^mreq(Date|Doctor|Clinic|Phone|Address|Supplier|Notes|Approver)$/.test(e.target.id)) {
+        mreqAutoSave();
+      }
+    });
+    $('app').addEventListener('change', (e) => {
+      const mriCard = e.target.closest && e.target.closest('.mreq-item-card');
+      if (mriCard && e.target.tagName === 'SELECT' && e.target.dataset.field) {
+        mreqUpdateItemField(mriCard.dataset.id, e.target.dataset.field, e.target.value);
+      }
+    });
+    $('app').addEventListener('keydown', (e) => {
+      if (e.target && e.target.id === 'act2CodeInput' && e.key === 'Enter') act2AttemptActivate();
+    });
+
+    // نافذة اختيار جهة التواصل (تفعيل عبر واتساب)
+    const ccOverlay = $('contactChoiceOverlay');
+    if (ccOverlay) {
+      const ccClose = $('ccClose');
+      if (ccClose) ccClose.addEventListener('click', closeContactChoice);
+      ccOverlay.addEventListener('click', (e) => { if (e.target === ccOverlay) closeContactChoice(); });
+      ccOverlay.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-act]'); if (!b) return;
+        if (b.dataset.act === 'cc-official') { closeContactChoice(); openActivationRequest(); }
+        else if (b.dataset.act === 'cc-agent') { closeContactChoice(); openAgentRequest(); }
+      });
+    }
+
+    // نافذة معاينة طلب المواد
+    const mreqPvOverlay = $('mreqPreviewOverlay');
+    if (mreqPvOverlay) {
+      const pvClose = $('mreqPreviewClose'); if (pvClose) pvClose.addEventListener('click', mreqClosePreview);
+      mreqPvOverlay.addEventListener('click', (e) => { if (e.target === mreqPvOverlay) mreqClosePreview(); });
+      const pvPrint = $('mreqPreviewPrintBtn'); if (pvPrint) pvPrint.addEventListener('click', () => { mreqClosePreview(); mreqDoPrint(); });
+      const pvPdf = $('mreqPreviewPdfBtn'); if (pvPdf) pvPdf.addEventListener('click', () => { mreqClosePreview(); mreqDoPrint(); });
+    }
 
     // تأكيد عام
     els.confirmOk.addEventListener('click', confirmYes);
@@ -2206,6 +2747,40 @@
     });
   }
 
+  /* ============================================================
+     الصفحة الافتتاحية — تظهر عند أول استخدام فقط، ولا تؤثر إطلاقاً
+     على بيانات مستخدم لديه استخدام سابق (طبيب محفوظ/مرضى/تفعيل/تجربة).
+     ============================================================ */
+  var ONBOARD_KEY = 'dentpilot_onboarding_done_v1';
+  function onboardingDone() { try { return localStorage.getItem(ONBOARD_KEY) === '1'; } catch (e) { return true; } }
+  function markOnboardingDone() { try { localStorage.setItem(ONBOARD_KEY, '1'); } catch (e) {} }
+  function hasPriorUsage() {
+    try {
+      if (settings.doctorName) return true;
+      if (Array.isArray(patients) && patients.length > 0) return true;
+      if (window.DPLicense && window.DPLicense.isActivated && window.DPLicense.isActivated()) return true;
+      // ملاحظة: لا يُستخدم مفتاح بداية التجربة (trial_start) كإشارة هنا، لأن activation.js
+      // ينشئه تلقائياً عند أول تحميل للصفحة (قبل وصول التنفيذ إلى هذه الدالة)، وبالتالي
+      // سيكون موجوداً دائماً حتى لمستخدم جديد فعلاً — الاعتماد عليه كان يمنع ظهور
+      // الصفحة الافتتاحية نهائياً. الإشارات الموثوقة الوحيدة هنا: اسم الطبيب المحفوظ،
+      // وجود مرضى، أو تفعيل سابق للتطبيق.
+    } catch (e) {}
+    return false;
+  }
+  function setupOnboarding() {
+    var ov = $('onboardOverlay'); if (!ov) return;
+    if (onboardingDone()) return;
+    if (hasPriorUsage()) { markOnboardingDone(); return; } // مستخدم سابق — لا تُعرض له الصفحة الافتتاحية ولا تفقد بياناته
+    ov.hidden = false;
+    var localBtn = $('onboardLocalBtn'), emailBtn = $('onboardEmailBtn');
+    if (localBtn) localBtn.addEventListener('click', function () {
+      markOnboardingDone(); ov.hidden = true; go('dashboard');
+    });
+    if (emailBtn) emailBtn.addEventListener('click', function () {
+      markOnboardingDone(); ov.hidden = true; go('account');
+    });
+  }
+
   function init() {
     loadSettings(); load(); normalize(); loadAttachments();
     bindEvents();
@@ -2213,6 +2788,7 @@
     applyRoute();
     buildAlerts(true);
     setupPWA();
+    setupOnboarding();
     // بوابة الوصول: مُفعّل/تجربة → إعداد الطبيب عند اللزوم؛ منتهية → التفعيل يحظر (activation.js)
     var _needDoctor = function () { if (!settings.doctorName) openDoctor(false); };
     var _state = window.DPLicense ? window.DPLicense.getAccessState() : 'activated';
